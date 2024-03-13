@@ -15,6 +15,7 @@ public static class ModulesConfiguration
         services.ConfigureBlogModule();
         services.ConfigureEncountersModule();
         services.ConfigurePaymentsModule();
+        services.AddHttpClient();
 
         return services;
     }

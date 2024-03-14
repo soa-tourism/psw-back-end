@@ -15,7 +15,7 @@ namespace Explorer.Tours.API.Public.Administration
         Result<TourDto> AddEquipment(int tourId, int equipmentId, int userId);
         Result<TourDto> RemoveEquipment(int tourId, int equipmentId, int userId);
         Result<TourDto> Get(int id);
-        public Result<TourPreviewDto> GetPublishedTour(int id);
+        public Result<TourPreviewDto> GetPublishedTour(long id);
         Result<TourDto> Publish(int id, int userId);
         Result<TourDto> AddTime(TourTimesDto tourTimesDto, int id, int userId);
         Result<TourDto> Archive(int id, int userId);

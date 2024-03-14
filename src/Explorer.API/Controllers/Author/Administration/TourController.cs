@@ -1,102 +1,180 @@
 ﻿using Explorer.BuildingBlocks.Core.UseCases;
-using Explorer.Stakeholders.Infrastructure.Authentication;
 using Explorer.Tours.API.Dtos;
-using Explorer.Tours.API.Public.Administration;
+using FluentResults;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Text;
+using System.Text.Json;
 
 namespace Explorer.API.Controllers.Author.Administration
 {
     [Authorize(Policy = "authorPolicy")]
-    [Route("api/administration/tour")]
+    [Route("api/administration/tours")]
     public class TourController : BaseApiController
     {
-        private readonly ITourService _tourService;
+        private readonly HttpClient _httpClient;
 
-
-        public TourController(ITourService tourService)
+        public TourController(IHttpClientFactory httpClientFactory)
         {
-            _tourService = tourService;
+            _httpClient = httpClientFactory.CreateClient();
+            _httpClient.BaseAddress = new Uri("http://localhost:8081/v1/tours");
+        }
 
+
+        [HttpGet]
+        public async Task<ActionResult<PagedResult<BasicTourDto>>> GetAll([FromQuery] int page, [FromQuery] int pageSize)
+        {
+            using var response = await _httpClient.GetAsync("");
+            var result = await response.Content.ReadAsStringAsync();
+
+            if (!response.IsSuccessStatusCode)
+            {
+                var error = Result.Fail($"Failed to get tours: {result}");
+                return CreateResponse(error);
+            }
+
+            var tours = JsonSerializer.Deserialize<List<BasicTourDto>>(result);
+            if (tours is null)
+            {
+                var noTours = Result.Ok("No tours found.");
+                return CreateResponse(noTours);
+
+            }
+
+            var pagedResult = PaginateResult(page, pageSize, tours);
+            return Ok(pagedResult);
+        }
+
+        [HttpGet("{id:long}")]
+        public async Task<ActionResult<BasicTourDto>> GetById(long id)
+        {
+            using var response = await _httpClient.GetAsync(ConstructUrl(id.ToString()));
+            var result = await response.Content.ReadAsStringAsync();
+
+            if (!response.IsSuccessStatusCode)
+            {
+                var errorResult = Result.Fail($"Failed to get tour: {result}");
+                return CreateResponse(errorResult);
+            }
+
+            var tour = JsonSerializer.Deserialize<BasicTourDto>(result);
+            return Ok(tour);
         }
 
         [HttpPost]
-        public ActionResult<TourDto> Create([FromBody] TourDto tour)
+        public async Task<ActionResult<BasicTourDto>> Create([FromBody] BasicTourDto tour)
         {
-            var result = _tourService.Create(tour);
-            return CreateResponse(result);
+            using var jsonContent = new StringContent(JsonSerializer.Serialize(tour), Encoding.UTF8, "application/json");
+            using var response = await _httpClient.PostAsync("", jsonContent);
+
+            var responseContent = await response.Content.ReadAsStringAsync();
+            var result = JsonSerializer.Deserialize<BasicTourDto>(responseContent);
+
+            return CreateResponse(result.ToResult());
         }
 
-        [HttpPut("{id:int}")]
-        public ActionResult<TourDto> Update([FromBody] TourDto tour)
+        [HttpPut("{id:long}")]
+        public async Task<ActionResult<BasicTourDto>> Update([FromBody] BasicTourDto tour, long id)
         {
-            tour.Equipment = new List<EquipmentDto>();
-            var result = _tourService.Update(tour, User.PersonId());
-            return CreateResponse(result);
+            using var jsonContent = new StringContent(JsonSerializer.Serialize(tour), Encoding.UTF8, "application/json");
+            using var response = await _httpClient.PutAsync(ConstructUrl(id.ToString()), jsonContent);
+
+            var responseContent = await response.Content.ReadAsStringAsync();
+            var result = JsonSerializer.Deserialize<BasicTourDto>(responseContent);
+
+            return CreateResponse(result.ToResult());
         }
 
         [HttpDelete("{id:int}")]
-        public ActionResult Delete(int id)
+        public async Task<ActionResult> Delete(int id)
         {
-            var result = _tourService.Delete(id, User.PersonId());
-            return CreateResponse(result);
+            using var response = await _httpClient.DeleteAsync(ConstructUrl(id.ToString()));
+
+            if (response.IsSuccessStatusCode) return NoContent();
+
+            var errorResult = Result.Fail("Failed to delete equipment.");
+            return CreateResponse(errorResult);
         }
 
-        [HttpGet("by-author")]
-        public ActionResult<List<TourDto>> GetToursByAuthor([FromQuery] int page, [FromQuery] int pageSize)
+        [HttpGet("author/{id:long}")]
+        public async Task<ActionResult<List<BasicTourDto>>> GetByAuthor([FromQuery] int page, [FromQuery] int pageSize, long id)
         {
-            var result = _tourService.GetToursByAuthor(page, pageSize, User.PersonId());
-            return CreateResponse(result);
+            var requestUri = ConstructUrl($"author/{id}");
+
+            using var response = await _httpClient.GetAsync(requestUri);
+            var result = await response.Content.ReadAsStringAsync();
+
+            if (!response.IsSuccessStatusCode)
+            {
+                return BadRequest($"Failed to get tour: {result}");
+            }
+
+            var tours = JsonSerializer.Deserialize<List<BasicTourDto>>(result);
+            if (tours is null)
+            {
+                var noTours = Result.Ok("No tours found.");
+                return CreateResponse(noTours);
+
+            }
+
+            var pagedResult = PaginateResult(page, pageSize, tours);
+            return Ok(pagedResult);
         }
 
-        [HttpGet]
-        public ActionResult<PagedResult<TourDto>> GetAll([FromQuery] int page, [FromQuery] int pageSize)
+        // TODO equipment ADD/REMOVE
+        // [HttpPut("add/{tourId:int}/{equipmentId:int}")]
+        // public ActionResult<BasicTourDto> AddEquipment(int tourId, int equipmentId)
+        // {
+        //     var result = _tourService.AddEquipment(tourId, equipmentId, User.PersonId());
+        //     return CreateResponse(result);
+        // }
+        //
+        // [HttpPut("remove/{tourId:int}/{equipmentId:int}")]
+        // public ActionResult<BasicTourDto> RemoveEquipment(int tourId, int equipmentId)
+        // {
+        //     var result = _tourService.RemoveEquipment(tourId, equipmentId, User.PersonId());
+        //     return CreateResponse(result);
+        // }
+        // equipment ADD/REMOVE
+
+
+        // [HttpPut("publishedTours/{id:int}")]
+        // public ActionResult<BasicTourDto> Publish(int id)
+        // {
+        //     var result = _tourService.Publish(id, User.PersonId());
+        //     return CreateResponse(result);
+        // }
+        //
+        // [HttpPut("archivedTours/{id:int}")]
+        // public ActionResult<BasicTourDto> Archive(int id)
+        // {
+        //     var result = _tourService.Archive(id, User.PersonId());
+        //     return CreateResponse(result);
+        // }
+        //
+        // [HttpPut("tourTime/{id:int}")]
+        // public ActionResult<BasicTourDto> AddTime(TourTimesDto tourTimesDto, int id)
+        // {
+        //     var result = _tourService.AddTime(tourTimesDto, id, User.PersonId());
+        //     return CreateResponse(result);
+        // }
+
+        private string ConstructUrl(string relativePath)
         {
-            var result = _tourService.GetPaged(page, pageSize);
-            return CreateResponse(result);
+            return $"{_httpClient.BaseAddress}/{relativePath}";
         }
 
-        [HttpPut("add/{tourId:int}/{equipmentId:int}")]
-        public ActionResult<TourDto> AddEquipment(int tourId, int equipmentId)
+        private static PagedResult<BasicTourDto> PaginateResult(int page, int pageSize, List<BasicTourDto> tours)
         {
-            var result = _tourService.AddEquipment(tourId, equipmentId, User.PersonId());
-            return CreateResponse(result);
-        }
+            if (page == 0 && pageSize == 0)
+            {
+                return new PagedResult<BasicTourDto>(tours, tours.Count);
+            }
 
-        [HttpPut("remove/{tourId:int}/{equipmentId:int}")]
-        public ActionResult<TourDto> RemoveEquipment(int tourId, int equipmentId)
-        {
-            var result = _tourService.RemoveEquipment(tourId, equipmentId, User.PersonId());
-            return CreateResponse(result);
+            var totalCount = tours.Count;
+            var startIndex = (page - 1) * pageSize;
+            var paginatedList = tours.Skip(startIndex).Take(pageSize).ToList();
+            return new PagedResult<BasicTourDto>(paginatedList, totalCount);
         }
-
-        [HttpGet("details/{id:int}")]
-        public ActionResult<TourDto> Get(int id)
-        {
-            var result = _tourService.Get(id);
-            return CreateResponse(result);
-        }
-
-        [HttpPut("publishedTours/{id:int}")]
-        public ActionResult<TourDto> Publish(int id)
-        {
-            var result = _tourService.Publish(id, User.PersonId());
-            return CreateResponse(result);
-        }
-
-        [HttpPut("archivedTours/{id:int}")]
-        public ActionResult<TourDto> Archive(int id)
-        {
-            var result = _tourService.Archive(id, User.PersonId());
-            return CreateResponse(result);
-        }
-
-        [HttpPut("tourTime/{id:int}")]
-        public ActionResult<TourDto> AddTime(TourTimesDto tourTimesDto, int id)
-        {
-            var result = _tourService.AddTime(tourTimesDto, id, User.PersonId());
-            return CreateResponse(result);
-        }
-
     }
 }

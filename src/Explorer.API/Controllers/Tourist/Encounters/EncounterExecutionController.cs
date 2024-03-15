@@ -1,9 +1,17 @@
-﻿using Explorer.BuildingBlocks.Core.UseCases;
+﻿using Explorer.API.Services;
+using Explorer.BuildingBlocks.Core.UseCases;
 using Explorer.Encounters.API.Dtos;
 using Explorer.Encounters.API.Public;
+using Explorer.Encounters.Core.Domain.Encounters;
 using Explorer.Stakeholders.Infrastructure.Authentication;
+using FluentResults;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using static System.Net.Mime.MediaTypeNames;
+using System.Text.Json;
+using System.Text;
+using Explorer.Stakeholders.Core.Domain;
+using Azure;
 
 namespace Explorer.API.Controllers.Tourist.Encounters
 {
@@ -65,46 +73,119 @@ namespace Explorer.API.Controllers.Tourist.Encounters
         }
 
         [HttpGet("get-all-completed")]
-        public ActionResult<PagedResult<EncounterExecutionDto>> GetAllCompletedByTourist([FromQuery] int page, [FromQuery] int pageSize)
+        public async Task<ActionResult<PagedResult<EncounterExecutionDto>>> GetAllCompletedByTourist([FromQuery] int page, [FromQuery] int pageSize)
         {
-            var result = _encounterExecutionService.GetAllCompletedByTourist(User.PersonId(), page, pageSize);
-            return CreateResponse(result);
+            HttpResponseMessage response = await client.GetAsync($"{baseUrl}/getAllCompletedByTourist/{User.PersonId()}");
+            Response.ContentType = "application/json";
+            if (response.IsSuccessStatusCode)
+            {
+                string responseJson = await response.Content.ReadAsStringAsync();
+
+                // Deserialize JSON string to EncounterDto object
+                List<EncounterExecutionDto> responseEncounter = JsonSerializer.Deserialize<List<EncounterExecutionDto>>(responseJson);
+
+                var result = new Result<List<EncounterExecutionDto>>().WithValue(responseEncounter);
+                // Use the responseEncounter object as needed
+                return CreateResponse(result);
+            }
+            return CreateResponse(new Result<EncounterDto>().WithError("Error"));
         }
         
         [HttpGet("get-by-tour/{id:int}")]
-        public ActionResult<EncounterExecutionDto> GetByTour([FromRoute] int id, [FromQuery] double touristLatitude, [FromQuery] double touristLongitude)
+        public async Task<ActionResult<EncounterExecutionDto>> GetByTour([FromRoute] int id, [FromQuery] double touristLatitude, [FromQuery] double touristLongitude)
         {
-            var result = _encounterExecutionService.GetVisibleByTour(id, touristLongitude, touristLatitude, User.PersonId());
-            if(result.IsSuccess)
-                result = _encounterService.AddEncounter(result.Value);
-            return CreateResponse(result);
+            List<int> encounterIds = new();  //get encounters on tour by ID: id
+            var json = JsonSerializer.Serialize(encounterIds);
+
+            var content = new StringContent(json, Encoding.UTF8, "application/json");
+
+            HttpResponseMessage response = await client.PutAsync($"{baseUrl}/getByTour/{touristLatitude}/{touristLongitude}/{User.PersonId()}", content);
+            Response.ContentType = "application/json";
+            if (response.IsSuccessStatusCode)
+            {
+                string responseJson = await response.Content.ReadAsStringAsync();
+
+                // Deserialize JSON string to EncounterDto object
+                EncounterExecutionDto responseEncounter = JsonSerializer.Deserialize<EncounterExecutionDto>(responseJson);
+
+                var result = new Result<EncounterExecutionDto>().WithValue(responseEncounter);
+                // Use the responseEncounter object as needed
+                return CreateResponse(result);
+            }
+            return CreateResponse(new Result<EncounterDto>().WithError("Error"));
         }
 
         [HttpGet("social/checkRange/{id:int}/{tourId:int}")]
-        public ActionResult<EncounterExecutionDto> CheckPosition([FromRoute] int tourId, [FromRoute] int id, [FromQuery] double touristLatitude, [FromQuery] double touristLongitude)
+        public async Task<ActionResult<EncounterExecutionDto>> CheckPosition([FromRoute] int tourId, [FromRoute] int id, [FromQuery] double touristLatitude, [FromQuery] double touristLongitude)
         {
-            var result = _encounterExecutionService.GetWithUpdatedLocation(tourId, id, touristLongitude, touristLatitude, User.PersonId());
-            if (result.IsSuccess)
-                result = _encounterService.AddEncounter(result.Value);
-            return CreateResponse(result);
+            List<int> encounterIds = new();  //get encounters on tour by ID: id
+            var json = JsonSerializer.Serialize(encounterIds);
+
+            var content = new StringContent(json, Encoding.UTF8, "application/json");
+
+            HttpResponseMessage response = await client.PutAsync($"{baseUrl}/checkPosition/{id}/{touristLatitude}/{touristLongitude}/{User.PersonId()}", content);
+            Response.ContentType = "application/json";
+            if (response.IsSuccessStatusCode)
+            {
+                string responseJson = await response.Content.ReadAsStringAsync();
+
+                // Deserialize JSON string to EncounterDto object
+                EncounterExecutionDto responseEncounter = JsonSerializer.Deserialize<EncounterExecutionDto>(responseJson);
+
+                var result = new Result<EncounterExecutionDto>().WithValue(responseEncounter);
+                // Use the responseEncounter object as needed
+                return CreateResponse(result);
+            }
+            return CreateResponse(new Result<EncounterDto>().WithError("Error"));
         }
 
         [HttpGet("location/checkRange/{id:int}/{tourId:int}")]
-        public ActionResult<EncounterExecutionDto> CheckPositionLocationEncounter([FromRoute] int tourId, [FromRoute] int id, [FromQuery] double touristLatitude, [FromQuery] double touristLongitude)
+        public async Task<ActionResult<EncounterExecutionDto>> CheckPositionLocationEncounter([FromRoute] int tourId, [FromRoute] int id, [FromQuery] double touristLatitude, [FromQuery] double touristLongitude)
         {
-            var result = _encounterExecutionService.GetHiddenLocationEncounterWithUpdatedLocation(tourId, id, touristLongitude, touristLatitude, User.PersonId());
-            if (result.IsSuccess)
-                result = _encounterService.AddEncounter(result.Value);
-            return CreateResponse(result);
+            List<int> encounterIds = new();  //get encounters on tour by ID: id
+            var json = JsonSerializer.Serialize(encounterIds);
+
+            var content = new StringContent(json, Encoding.UTF8, "application/json");
+
+            HttpResponseMessage response = await client.PutAsync($"{baseUrl}/checkPositionLocationEncounter/{id}/{touristLatitude}/{touristLongitude}/{User.PersonId()}", content);
+            Response.ContentType = "application/json";
+            if (response.IsSuccessStatusCode)
+            {
+                string responseJson = await response.Content.ReadAsStringAsync();
+
+                // Deserialize JSON string to EncounterDto object
+                EncounterExecutionDto responseEncounter = JsonSerializer.Deserialize<EncounterExecutionDto>(responseJson);
+
+                var result = new Result<EncounterExecutionDto>().WithValue(responseEncounter);
+                // Use the responseEncounter object as needed
+                return CreateResponse(result);
+            }
+            return CreateResponse(new Result<EncounterDto>().WithError("Error"));
         }
 
         [HttpGet("active/by-tour/{id:int}")]
-        public ActionResult<List<EncounterExecutionDto>> GetActiveByTour([FromRoute] int id)
+        public async Task<ActionResult<List<EncounterExecutionDto>>> GetActiveByTour([FromRoute] int id)
         {
-            var result = _encounterExecutionService.GetActiveByTour(User.PersonId(), id);
-            if (result.IsSuccess)
-                result = _encounterService.AddEncounters(result.Value);
-            return CreateResponse(result);
+            List<int> encounterIds = new();  //get encounters on tour by ID: id
+            var json = JsonSerializer.Serialize(encounterIds);
+
+            var content = new StringContent(json, Encoding.UTF8, "application/json");
+
+            HttpResponseMessage response = await client.PutAsync($"{baseUrl}/getActiveByTour/{User.PersonId()}", content);
+            Response.ContentType = "application/json";
+            if (response.IsSuccessStatusCode)
+            {
+                string responseJson = await response.Content.ReadAsStringAsync();
+
+                // Deserialize JSON string to EncounterDto object
+                List<EncounterExecutionDto> responseEncounter = JsonSerializer.Deserialize<List<EncounterExecutionDto>>(responseJson);
+
+                var result = new Result<List<EncounterExecutionDto>>().WithValue(responseEncounter);
+                // Use the responseEncounter object as needed
+                return CreateResponse(result);
+            }
+            return CreateResponse(new Result<EncounterDto>().WithError("Error"));
+
         }
     }
 }

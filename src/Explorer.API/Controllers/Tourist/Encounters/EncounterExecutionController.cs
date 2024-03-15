@@ -8,23 +8,19 @@ using Microsoft.AspNetCore.Mvc;
 namespace Explorer.API.Controllers.Tourist.Encounters
 {
     [Route("api/tourist/encounter-execution")]
-    [Authorize(Policy = "touristPolicy")]
+    // [Authorize(Policy = "touristPolicy")]
     public class EncounterExecutionController : BaseApiController
     {
-        private readonly IEncounterExecutionService _encounterExecutionService;
-        private readonly IEncounterService _encounterService;
+        static readonly HttpClient client = new HttpClient();
+        private string baseUrl = $"http://localhost:8090/execution";
 
-        public EncounterExecutionController(IEncounterExecutionService encounterExecutionService, IEncounterService encounterService)
-        {
-            _encounterExecutionService = encounterExecutionService;
-            _encounterService = encounterService;
-        }
+
+        public EncounterExecutionController() { }
 
         [HttpGet("{id:int}")]
-        public ActionResult<EncounterDto> GetById([FromRoute] int id)
+        public async Task<ActionResult<EncounterDto>> GetById([FromRoute] int id)
         {
-            var result = _encounterExecutionService.Get(id);
-            return CreateResponse(result);
+            using HttpResponseMessage response = await client.GetAsync(baseUrl + "/getAll")
         }
 
         [HttpPut]

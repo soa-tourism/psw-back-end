@@ -28,48 +28,101 @@ namespace Explorer.API.Controllers.Tourist.Encounters
         [HttpGet("{id:int}")]
         public async Task<ActionResult<EncounterDto>> GetById([FromRoute] int id)
         {
-            using HttpResponseMessage response = await client.GetAsync(baseUrl + "/getAll")
+            using HttpResponseMessage response = await client.GetAsync(baseUrl + $"/get/{id}");
+
+            if (response.IsSuccessStatusCode)
+            {
+                string jsonResponse = await response.Content.ReadAsStringAsync();
+                return CreateResponse(jsonResponse.ToResult());
+            }
+            else
+            {
+                return StatusCode((int)response.StatusCode);
+            }
         }
 
         [HttpPut]
-        public ActionResult<EncounterExecutionDto> Update([FromForm] EncounterExecutionDto encounterExecution)
+        public async Task<ActionResult<EncounterExecutionDto>> Update([FromForm] EncounterExecutionDto encounterExecution)
         {
-            var result = _encounterExecutionService.Update(encounterExecution, User.PersonId());
-            return CreateResponse(result);
+            var json = JsonSerializer.Serialize(encounterExecution);
+
+            var content = new StringContent(json, Encoding.UTF8, "application/json");
+
+            HttpResponseMessage response = await client.PutAsync($"{baseUrl}/update", content);
+            Response.ContentType = "application/json";
+            if (response.IsSuccessStatusCode)
+            {
+                string responseJson = await response.Content.ReadAsStringAsync();
+
+                EncounterExecutionDto responseExecution = JsonSerializer.Deserialize<EncounterExecutionDto>(responseJson);
+
+                var result = new Result<EncounterExecutionDto>().WithValue(responseExecution);
+                return CreateResponse(result);
+            }
+
+
+            return CreateResponse(new Result<EncounterExecutionDto>().WithError("Error"));
         }
 
         [HttpPut("activate/{id:int}")]
-        public ActionResult<EncounterExecutionDto> Activate([FromRoute] int id, [FromForm] double touristLatitude, [FromForm] double touristLongitude)
+        public async Task<ActionResult<EncounterExecutionDto>> Activate([FromRoute] int id, [FromForm] double touristLatitude, [FromForm] double touristLongitude)
         {
-            var result = _encounterExecutionService.Activate(User.PersonId(), touristLatitude, touristLongitude, id);
-            return CreateResponse(result);
+            HttpResponseMessage response = await client.PutAsync($"{baseUrl}/activate/{id}/{touristLatitude}/{touristLongitude}", null);
+            Response.ContentType = "application/json";
+            if (response.IsSuccessStatusCode)
+            {
+                string responseJson = await response.Content.ReadAsStringAsync();
+
+                EncounterExecutionDto responseExecution = JsonSerializer.Deserialize<EncounterExecutionDto>(responseJson);
+
+                var result = new Result<EncounterExecutionDto>().WithValue(responseExecution);
+                return CreateResponse(result);
+            }
+
+
+            return CreateResponse(new Result<EncounterExecutionDto>().WithError("Error"));
         }
 
         [HttpPut("completed/{id:int}")]
-        public ActionResult<EncounterExecutionDto> CompleteExecution([FromRoute] int id, [FromForm] double touristLatitude, [FromForm] double touristLongitude)
+        public async Task<ActionResult<EncounterExecutionDto>> CompleteExecution([FromRoute] int id, [FromForm] double touristLatitude, [FromForm] double touristLongitude)
         {
-            var result = _encounterExecutionService.CompleteExecution(id, User.PersonId(), touristLatitude, touristLongitude);
-            if (result.IsSuccess)
-                result = _encounterService.AddEncounter(result.Value);
-            return CreateResponse(result);
+            HttpResponseMessage response = await client.PutAsync($"{baseUrl}/completed/{id}/{touristLatitude}/{touristLongitude}", null);
+            Response.ContentType = "application/json";
+            if (response.IsSuccessStatusCode)
+            {
+                string responseJson = await response.Content.ReadAsStringAsync();
+
+                EncounterExecutionDto responseExecution = JsonSerializer.Deserialize<EncounterExecutionDto>(responseJson);
+
+                var result = new Result<EncounterExecutionDto>().WithValue(responseExecution);
+                return CreateResponse(result);
+            }
+
+
+            return CreateResponse(new Result<EncounterExecutionDto>().WithError("Error"));
         }
 
         [HttpDelete("{id:int}")]
-        public ActionResult Delete(int id)
+        public async Task<ActionResult> Delete(int id)
         {
-            var result = _encounterExecutionService.Delete(id, User.PersonId());
-            return CreateResponse(result);
+            HttpResponseMessage response = await client.DeleteAsync($"{baseUrl}/delete/{id}");
+            return StatusCode((int)response.StatusCode);
         }
 
-        [HttpGet("get-all/{id:int}")]
-        public ActionResult<PagedResult<EncounterExecutionDto>> GetAllByTourist(int id, [FromQuery] int page, [FromQuery] int pageSize)
+        [HttpGet("getAllByTourist/{id:int}")]
+        public async Task<ActionResult<PagedResult<EncounterExecutionDto>>> GetAllByTourist(int id)
         {
-            if (id != User.PersonId())
+            using HttpResponseMessage response = await client.GetAsync(baseUrl + $"/getAllByTourist/{id}");
+
+            if (response.IsSuccessStatusCode)
             {
-                return Unauthorized();
+                string jsonResponse = await response.Content.ReadAsStringAsync();
+                return CreateResponse(jsonResponse.ToResult());
             }
-            var result = _encounterExecutionService.GetAllByTourist(id, page, pageSize);
-            return CreateResponse(result);
+            else
+            {
+                return StatusCode((int)response.StatusCode);
+            }
         }
 
         [HttpGet("get-all-completed")]

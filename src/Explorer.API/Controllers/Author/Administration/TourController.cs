@@ -85,8 +85,8 @@ namespace Explorer.API.Controllers.Author.Administration
             return CreateResponse(result.ToResult());
         }
 
-        [HttpDelete("{id:int}")]
-        public async Task<ActionResult> Delete(int id)
+        [HttpDelete("{id:long}")]
+        public async Task<ActionResult> Delete(long id)
         {
             using var response = await _httpClient.DeleteAsync(ConstructUrl(id.ToString()));
 
@@ -121,21 +121,27 @@ namespace Explorer.API.Controllers.Author.Administration
             return Ok(pagedResult);
         }
 
-        // TODO equipment ADD/REMOVE
-        // [HttpPut("add/{tourId:int}/{equipmentId:int}")]
-        // public ActionResult<BasicTourDto> AddEquipment(int tourId, int equipmentId)
-        // {
-        //     var result = _tourService.AddEquipment(tourId, equipmentId, User.PersonId());
-        //     return CreateResponse(result);
-        // }
-        //
-        // [HttpPut("remove/{tourId:int}/{equipmentId:int}")]
-        // public ActionResult<BasicTourDto> RemoveEquipment(int tourId, int equipmentId)
-        // {
-        //     var result = _tourService.RemoveEquipment(tourId, equipmentId, User.PersonId());
-        //     return CreateResponse(result);
-        // }
-        // equipment ADD/REMOVE
+        [HttpPost("{id:long}/equipment/{equipmentId:long}")]
+        public async Task<ActionResult> AddEquipment(long id, long equipmentId)
+        {
+            using var response = await _httpClient.PostAsync(ConstructUrl($"{id}/equipment/{equipmentId}"), null);
+
+            if (response.IsSuccessStatusCode) return Ok();
+
+            var errorResult = Result.Fail("Failed to add equipment.");
+            return CreateResponse(errorResult);
+        }
+
+        [HttpDelete("{id:long}/equipment/{equipmentId:long}")]
+        public async Task<ActionResult> RemoveEquipment(long id, long equipmentId)
+        {
+            using var response = await _httpClient.DeleteAsync(ConstructUrl($"{id}/equipment/{equipmentId}"));
+
+            if (response.IsSuccessStatusCode) return NoContent();
+
+            var errorResult = Result.Fail("Failed to delete equipment.");
+            return CreateResponse(errorResult);
+        }
 
 
         // [HttpPut("publishedTours/{id:int}")]

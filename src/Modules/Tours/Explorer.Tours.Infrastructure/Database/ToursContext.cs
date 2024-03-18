@@ -23,9 +23,6 @@ public class ToursContext : DbContext
     public DbSet<PublicMapObject> PublicMapObjects { get; set; }
     public DbSet<TouristPosition> TouristPosition { get; set; }
     public DbSet<TourExecution> TourExecution { get; set; }
-    public DbSet<CompositeTour> CompositeTours { get; set; }
-    public DbSet<PrivateTour> PrivateTours { get; set; }
-
     public DbSet<TourBundle> TourBundles { get; set; }
     public DbSet<TourTourBundle> TourTourBundles { get; set; }
 
@@ -70,9 +67,6 @@ public class ToursContext : DbContext
             v => TourExecutionEventsConverter.Read(v)
         )
         .HasColumnType("jsonb");
-        modelBuilder.Entity<PrivateTour>().Property(item => item.Checkpoints).HasColumnType("jsonb");
-        modelBuilder.Entity<PrivateTour>().Property(item => item.Execution).HasColumnType("jsonb");
-        modelBuilder.Entity<PrivateTour>().Property(item => item.Blog).HasColumnType("jsonb");
 
         modelBuilder.Entity<TourBundle>()
             .HasMany(tb => tb.Tours)
@@ -87,8 +81,6 @@ public class ToursContext : DbContext
            .Property(item => item.TourTimes).HasColumnType("jsonb");
         modelBuilder.Entity<Checkpoint>()
           .Property(item => item.CheckpointSecret).HasColumnType("jsonb");
-        modelBuilder.Entity<CompositeTour>()
-          .Property(item => item.TourIds).HasColumnType("jsonb");
     }
 
     private static void ConfigureReportedIssues(ModelBuilder modelBuilder)

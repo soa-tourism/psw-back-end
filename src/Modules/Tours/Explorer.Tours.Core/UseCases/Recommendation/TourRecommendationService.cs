@@ -100,7 +100,7 @@ namespace Explorer.Tours.Core.UseCases.Recommendation
                     {
                         algorithmPoints[algorithmCounter] += (tour.Tags.Intersect(preference.Tags).Count() * 3);
                     }
-                    if (tour.DemandignessLevel != null && tour.DemandignessLevel.Equals(preference.Difficulty)) { algorithmPoints[algorithmCounter] += 2; }
+                    if (tour.Difficulty != null && tour.Difficulty.Equals(preference.Difficulty)) { algorithmPoints[algorithmCounter] += 2; }
 
                     if (dummyTour != null)
                     {

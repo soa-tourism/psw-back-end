@@ -10,8 +10,6 @@ using Explorer.Payments.Core.Domain;
 using Explorer.Payments.Core.UseCases;
 using Explorer.Payments.Core.Domain.RepositoryInterfaces;
 using Explorer.Payments.Infrastructure.Database.Repositories;
-using Explorer.BuildingBlocks.Core.UseCases;
-using Explorer.Payments.Core.Domain;
 
 namespace Explorer.Payments.Infrastructure;
 

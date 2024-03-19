@@ -46,16 +46,13 @@ public static class ToursStartup
         services.AddScoped<IPublicObjectService, PublicMapObjectService>();
         services.AddScoped<ITourExecutionService, TourExecutionService>();
         services.AddScoped<IInternalCheckpointService, InternalCheckpointService>();
-        services.AddScoped<ICompositeTourService, CompositeTourService>();
-        services.AddScoped<IPrivateTourService, PrivateTourService>();
         services.AddScoped<ITourBundleService, TourBundleService>();
-        services.AddScoped<ITourStatisticsService, TourStatisticsService>();
         services.AddScoped<ITourRecommendationService, TourRecommendationService>();
     }
     private static void SetupInfrastructure(IServiceCollection services)
     {
         services.AddScoped(typeof(ICrudRepository<Equipment>), typeof(CrudDatabaseRepository<Equipment, ToursContext>));
-        services.AddScoped(typeof(ICrudRepository<Explorer.Tours.Core.Domain.MapObject>), typeof(CrudDatabaseRepository<Explorer.Tours.Core.Domain.MapObject, ToursContext>));
+        services.AddScoped(typeof(ICrudRepository<MapObject>), typeof(CrudDatabaseRepository<MapObject, ToursContext>));
         services.AddScoped(typeof(ICrudRepository<TourPreference>), typeof(CrudDatabaseRepository<TourPreference, ToursContext>));
         services.AddScoped(typeof(ICrudRepository<TouristPosition>), typeof(CrudDatabaseRepository<TouristPosition, ToursContext>));
         services.AddScoped(typeof(ICheckpointRepository), typeof(CheckpointDatabaseRepository));
@@ -68,8 +65,6 @@ public static class ToursStartup
         services.AddScoped(typeof(ICrudRepository<ReportedIssue>), typeof(CrudDatabaseRepository<ReportedIssue, ToursContext>));
         services.AddScoped(typeof(ICrudRepository<PublicMapObject>), typeof(CrudDatabaseRepository<PublicMapObject, ToursContext>));
         services.AddScoped(typeof(ICrudRepository<PublicCheckpoint>), typeof(CrudDatabaseRepository<PublicCheckpoint, ToursContext>));
-        services.AddScoped(typeof(ICompositeTourRepository), typeof(CompositeTourDatabaseRepository));
-        services.AddScoped(typeof(IPrivateTourRepository), typeof(PrivateTourDatabaseRepository));
         services.AddScoped(typeof(ITourTourBundleRepository), typeof(TourTourBundleDatabaseRepository));
         services.AddScoped(typeof(ITourExecutionRepository),typeof(TourExecutionDatabaseRepository));
 		services.AddScoped<ITourRatingRepository, TourRatingDatabaseRepository>();

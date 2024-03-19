@@ -12,5 +12,6 @@ namespace Explorer.Encounters.API.Dtos
         public long TouristId { get; set; }
         public long EncounterId { get; set; }
         public string Status { get; set; }
+        public EncounterDto? EncounterDto { get; set; }
     }
 }

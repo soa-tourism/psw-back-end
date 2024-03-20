@@ -197,7 +197,7 @@ namespace Explorer.Tours.Core.UseCases.Recommendation
                 Id = purchasedTour.Id,
                 Name = purchasedTour.Name,
                 Description = purchasedTour.Description,
-                DemandignessLevel = purchasedTour.DemandignessLevel,
+                Difficulty = purchasedTour.DemandignessLevel,
                 Price = purchasedTour.Price,
                 Tags = purchasedTour.Tags,
                 Equipment = purchasedTour.Equipment,

@@ -11,5 +11,6 @@
         public double Price { get; set; }
         public List<string>? Tags { get; set; }
         public List<EquipmentDto>? Equipment { get; set; }
+        public List<CheckpointDto>? Checkpoints { get; set; }
     }
 }

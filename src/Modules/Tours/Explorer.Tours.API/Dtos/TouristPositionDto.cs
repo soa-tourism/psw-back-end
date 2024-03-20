@@ -2,8 +2,8 @@
 {
     public class TouristPositionDto
     {
-        public int Id { get; set; }
-        public int CreatorId { get; set; }
+        public long Id { get; set; }
+        public long CreatorId { get; set; }
         public float Longitude { get; set; }
         public float Latitude { get; set; }
     }

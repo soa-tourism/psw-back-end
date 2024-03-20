@@ -4,10 +4,10 @@ namespace Explorer.Tours.Core.Domain
 {
     public class TouristPosition : Entity
     {
-        public int CreatorId { get; init; }
+        public long CreatorId { get; init; }
         public float? Longitude { get; init; }
         public float? Latitude { get; init; }
-        public TouristPosition(int creatorId, float? longitude, float? latitude)
+        public TouristPosition(long creatorId, float? longitude, float? latitude)
         {
             if (latitude < -90 || latitude > 90)
             {

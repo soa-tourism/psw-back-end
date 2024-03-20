@@ -19,7 +19,7 @@ namespace Explorer.API.Controllers.Tourist.Tourism
         public TouristPositionController(IHttpClientFactory httpClientFactory)
         {
             _httpClient = httpClientFactory.CreateClient();
-            _httpClient.BaseAddress = new Uri($"http://localhost:8081/v1/tours/position");
+            _httpClient.BaseAddress = new Uri($"http://localhost:8081/v1/position");
         }
 
         [HttpGet]

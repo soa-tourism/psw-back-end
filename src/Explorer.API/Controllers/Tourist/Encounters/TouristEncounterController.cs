@@ -5,9 +5,15 @@ using Explorer.Encounters.API.Public;
 using Explorer.Encounters.Core.UseCases;
 using Explorer.Stakeholders.Infrastructure.Authentication;
 using Explorer.Tours.API.Dtos;
+using FluentResults;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Globalization;
+using System.Text.Json;
+using System.Text;
+using Explorer.Stakeholders.API.Internal;
+using Explorer.Stakeholders.Core.Domain;
+using Explorer.Stakeholders.Core.UseCases;
 
 namespace Explorer.API.Controllers.Tourist.Encounters
 {
@@ -16,85 +22,138 @@ namespace Explorer.API.Controllers.Tourist.Encounters
     {
         private readonly IEncounterService _encounterService;
         private readonly ImageService _imageService;
+        private readonly IInternalTouristService _personService;
+
+        private static readonly HttpClient client = new HttpClient();
+        private string baseUrl = $"http://localhost:8090/touristEncounter";
 
 
-        public TouristEncounterController(IEncounterService encounterService)
+        public TouristEncounterController(IEncounterService encounterService, IInternalTouristService s)
         {
             _encounterService = encounterService;
             _imageService = new ImageService();
-
+            _personService = s;
         }
 
         [HttpPost]
         [Authorize(Policy = "touristPolicy")]
-        public ActionResult<EncounterDto> Create([FromForm] EncounterDto encounter, [FromQuery] long checkpointId, [FromQuery] bool isSecretPrerequisite, [FromForm] List<IFormFile>? imageF = null)
+        public async Task<ActionResult<EncounterDto>> Create([FromForm] EncounterDto encounter, [FromQuery] long checkpointId, [FromQuery] bool isSecretPrerequisite, [FromForm] List<IFormFile>? imageF = null)
         {
-
-
-            if (imageF != null && imageF.Any())
-            {
-                var imageNames = _imageService.UploadImages(imageF);
-                if (encounter.Type == "Location")
-                    encounter.Image = imageNames[0];
-            }
-
+            if(_personService.Get(User.PersonId()).Value.Level < 10)
+                return CreateResponse(new Result<EncounterDto>().WithError("Error"));
             // Transformacija koordinata za longitude
             encounter.Longitude = TransformisiKoordinatu(encounter.Longitude);
 
             // Transformacija koordinata za latitude
             encounter.Latitude = TransformisiKoordinatu(encounter.Latitude);
 
-            encounter.Status = "Draft";
-            var result = _encounterService.CreateForTourist(encounter, checkpointId, isSecretPrerequisite, User.PersonId());
-            return CreateResponse(result);
-        }
-
-        [HttpPut]
-        [Authorize(Policy = "touristPolicy")]
-        public ActionResult<EncounterDto> Update([FromForm] EncounterDto encounter, [FromForm] List<IFormFile>? imageF = null)
-        {
-
             if (imageF != null && imageF.Any())
             {
                 var imageNames = _imageService.UploadImages(imageF);
                 if (encounter.Type == "Location")
                     encounter.Image = imageNames[0];
             }
+            var json = JsonSerializer.Serialize(encounter);
 
-            var result = _encounterService.Update(encounter, User.PersonId());
-            return CreateResponse(result);
+            var content = new StringContent(json, Encoding.UTF8, "application/json");
+
+            HttpResponseMessage response = await client.PostAsync($"{baseUrl}/create", content);
+            Response.ContentType = "application/json";
+            if (response.IsSuccessStatusCode)
+            {
+                // Read response content as JSON string
+                string responseJson = await response.Content.ReadAsStringAsync();
+
+                // Deserialize JSON string to EncounterDto object
+                EncounterDto responseEncounter = JsonSerializer.Deserialize<EncounterDto>(responseJson);
+
+                var result = new Result<EncounterDto>().WithValue(responseEncounter);
+                // Use the responseEncounter object as needed
+                return CreateResponse(result);
+            }
+            return CreateResponse(new Result<EncounterDto>().WithError("Error"));
+        }
+
+        [HttpPut]
+        [Authorize(Policy = "touristPolicy")]
+        public async Task<ActionResult<EncounterDto>> Update([FromForm] EncounterDto encounter, [FromForm] List<IFormFile>? imageF = null)
+        {
+            if (imageF != null && imageF.Any())
+            {
+                var imageNames = _imageService.UploadImages(imageF);
+                if (encounter.Type == "Location")
+                    encounter.Image = imageNames[0];
+            }
+            var json = JsonSerializer.Serialize(encounter);
+
+            var content = new StringContent(json, Encoding.UTF8, "application/json");
+
+            HttpResponseMessage response = await client.PutAsync($"{baseUrl}/update", content);
+            Response.ContentType = "application/json";
+            if (response.IsSuccessStatusCode)
+            {
+                // Read response content as JSON string
+                string responseJson = await response.Content.ReadAsStringAsync();
+
+                // Deserialize JSON string to EncounterDto object
+                EncounterDto responseEncounter = JsonSerializer.Deserialize<EncounterDto>(responseJson);
+
+                var result = new Result<EncounterDto>().WithValue(responseEncounter);
+                // Use the responseEncounter object as needed
+                return CreateResponse(result);
+            }
+
+
+            return CreateResponse(new Result<EncounterDto>().WithError("Error"));
         }
 
         [HttpDelete("{id:int}")]
         [Authorize(Policy = "touristPolicy")]
-        public ActionResult Delete(int id)
+        public async Task<ActionResult> Delete(int id)
         {
-            var result = _encounterService.Delete(id, User.PersonId());
-            return CreateResponse(result);
+            HttpResponseMessage response = await client.DeleteAsync($"{baseUrl}/delete/{id}");
+            return StatusCode((int)response.StatusCode);
         }
 
         [HttpGet]
         [Authorize(Policy = "administratorPolicy")]
-        public ActionResult<PagedResult<EncounterDto>> GetAll()
+        public async Task<ActionResult<PagedResult<EncounterRequestDto>>> GetAll()
         {
-            var result = _encounterService.GetPaged(0, 0);
-            return CreateResponse(result);
+            using HttpResponseMessage response = await client.GetAsync(baseUrl + "/getAll");
+
+            if (response.IsSuccessStatusCode)
+            {
+                string jsonResponse = await response.Content.ReadAsStringAsync();
+                return CreateResponse(jsonResponse.ToResult());
+            }
+            else
+            {
+                return StatusCode((int)response.StatusCode);
+            }
         }
 
         [HttpGet("{id:int}")]
         [Authorize(Policy = "touristPolicy")]
-        public ActionResult<EncounterDto> GetById(int id)
+        public async Task<ActionResult<EncounterDto>> GetById(int id)
         {
-            var result = _encounterService.Get(id);
-            return CreateResponse(result);
-        }
 
-        [HttpGet("requestInfo/{encounterId:long}")]
-        [Authorize(Policy = "administratorPolicy")]
-        public ActionResult<EncounterDto> GetRequestInfo(long encounterId)
-        {
-            var result = _encounterService.GetRequestInfo(encounterId);
-            return CreateResponse(result);
+            HttpResponseMessage response = await client.GetAsync($"{baseUrl}/get/{id}");
+            Response.ContentType = "application/json";
+            if (response.IsSuccessStatusCode)
+            {
+                // Read response content as JSON string
+                string responseJson = await response.Content.ReadAsStringAsync();
+
+                // Deserialize JSON string to EncounterDto object
+                EncounterDto responseEncounter = JsonSerializer.Deserialize<EncounterDto>(responseJson);
+
+                var result = new Result<EncounterDto>().WithValue(responseEncounter);
+                // Use the responseEncounter object as needed
+                return CreateResponse(result);
+            }
+
+
+            return CreateResponse(new Result<EncounterDto>().WithError("Error"));
         }
 
         // Funkcija za transformaciju koordinata

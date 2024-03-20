@@ -21,13 +21,15 @@ namespace Explorer.API.Controllers.Administrator.Administration
 
 
         [HttpGet]
-        public async Task<ActionResult<PagedResult<EncounterRequestDto>>> GetAll(){
+        public async Task<ActionResult<List<EncounterRequestDto>>> GetAll()
+        {
             using HttpResponseMessage response = await client.GetAsync(baseUrl + "/getAll");
 
             if (response.IsSuccessStatusCode)
             {
                 string jsonResponse = await response.Content.ReadAsStringAsync();
-                return CreateResponse(jsonResponse.ToResult());
+                var encounterRequests = JsonSerializer.Deserialize<List<EncounterRequestDto>>(jsonResponse);
+                return encounterRequests;
             }
             else
             {

@@ -57,7 +57,7 @@ namespace Explorer.API.Controllers.Tourist.Encounters
 
             var content = new StringContent(json, Encoding.UTF8, "application/json");
 
-            HttpResponseMessage response = await client.PostAsync($"{baseUrl}/create", content);
+            HttpResponseMessage response = await client.PostAsync($"{baseUrl}/create/{checkpointId}/{isSecretPrerequisite}", content);
             Response.ContentType = "application/json";
             if (response.IsSuccessStatusCode)
             {

@@ -50,7 +50,7 @@ namespace Explorer.API.Controllers.Author.Administration
         [Authorize(Policy = "authorPolicy")]
         public async Task<ActionResult<CheckpointDto>> GetById(long id)
         {
-            using var response = await _httpClient.GetAsync(ConstructUrl(id.ToString()));
+            using var response = await _httpClient.GetAsync(ConstructUrl("details/"+id.ToString()));
             var result = await response.Content.ReadAsStringAsync();
 
             if (!response.IsSuccessStatusCode)

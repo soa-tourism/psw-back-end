@@ -39,7 +39,7 @@ namespace Explorer.API.Controllers.Tourist.Encounters
         [Authorize(Policy = "touristPolicy")]
         public async Task<ActionResult<EncounterDto>> Create([FromForm] EncounterDto encounter, [FromQuery] long checkpointId, [FromQuery] bool isSecretPrerequisite, [FromForm] List<IFormFile>? imageF = null)
         {
-            if(_personService.Get(User.PersonId()).Value.Level >= 10)
+            if(_personService.Get(User.PersonId()).Value.Level < 10)
                 return CreateResponse(new Result<EncounterDto>().WithError("Error"));
             // Transformacija koordinata za longitude
             encounter.Longitude = TransformisiKoordinatu(encounter.Longitude);

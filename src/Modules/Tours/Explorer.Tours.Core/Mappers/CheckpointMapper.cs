@@ -25,10 +25,10 @@ namespace Explorer.Tours.Core.Mappers
             result.RequiredTimeInSeconds = checkpoint.RequiredTimeInSeconds;
             result.EncounterId= checkpoint.EncounterId;
             result.IsSecretPrerequisite = checkpoint.IsSecretPrerequisite;
-            if(checkpoint.CheckpointSecret!=null)
-                result.CheckpointSecret = secretMapper.createDto(checkpoint.CheckpointSecret.Description, checkpoint.CheckpointSecret.Pictures);
-            else
-                result.CheckpointSecret = null;
+            //if(checkpoint.CheckpointSecret!=null)
+            //    result.CheckpointSecret = secretMapper.createDto(checkpoint.CheckpointSecret.Description, checkpoint.CheckpointSecret.Pictures);
+            //else
+            //    result.CheckpointSecret = null;
             return result;
 
         }

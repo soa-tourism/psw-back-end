@@ -1,99 +1,71 @@
 ﻿using Explorer.API.Services;
-using Explorer.Blog.Core.Domain.BlogPosts;
 using Explorer.BuildingBlocks.Core.UseCases;
-using Explorer.Stakeholders.Infrastructure.Authentication;
 using Explorer.Tours.API.Dtos;
-using Explorer.Tours.API.Public.Administration;
-using Explorer.Tours.Core.Domain.Tours;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using static System.Net.Mime.MediaTypeNames;
+using FluentResults;
+using System.Text;
+using System.Text.Json;
 
 namespace Explorer.API.Controllers.Author.Administration
 {
     [Route("api/administration/checkpoint")]
     public class CheckpointController : BaseApiController
     {
-        private readonly ICheckpointService _checkpointService;
+        private readonly HttpClient _httpClient;
         private readonly ImageService _imageService;
 
-        public CheckpointController(ICheckpointService checkpointService)
+        public CheckpointController(IHttpClientFactory httpClientFactory)
         {
-            _checkpointService = checkpointService;
+            _httpClient = httpClientFactory.CreateClient();
+            _httpClient.BaseAddress = new Uri("http://localhost:8081/v1/tours/checkpoint");
             _imageService = new ImageService();
         }
 
-        [HttpGet("{id:int}")]
-        [Authorize(Policy = "authorPolicy")]
-        public ActionResult<List<CheckpointDto>> GetAllByTour([FromQuery] int page, [FromQuery] int pageSize, int id)
+        [HttpGet]
+        public async Task<ActionResult<PagedResult<CheckpointDto>>> GetAll([FromQuery] int page, [FromQuery] int pageSize)
         {
-            var result = _checkpointService.GetPagedByTour(page, pageSize, id);
-            return CreateResponse(result);
-        }
+            using var response = await _httpClient.GetAsync("");
+            var result = await response.Content.ReadAsStringAsync();
 
-        [HttpGet("details/{id:int}")]
-        [Authorize(Policy = "authorPolicy")]
-        public ActionResult<CheckpointDto> GetById(int id)
-        {
-            var result = _checkpointService.Get(id);
-            return CreateResponse(result);
-        }
-
-
-        [HttpPut("{id:int}")]
-        [Authorize(Policy = "authorPolicy")]
-        public ActionResult<CheckpointDto> Update([FromForm] CheckpointDto checkpoint, int id, [FromForm] List<IFormFile>? pictures = null)
-        {
-            if (pictures != null && pictures.Any())
+            if (!response.IsSuccessStatusCode)
             {
-                var imageNames = _imageService.UploadImages(pictures);
-                checkpoint.Pictures = imageNames;
+                var error = Result.Fail($"Failed to get checkpoints: {result}");
+                return CreateResponse(error);
             }
 
-            checkpoint.Id = id;
-            var result = _checkpointService.Update(checkpoint, User.PersonId());
-            return CreateResponse(result);
-        }
-
-        [HttpDelete("{id:int}")]
-        [Authorize(Policy = "authorPolicy")]
-        public ActionResult Delete(int id)
-        {
-            var result = _checkpointService.Delete(id, User.PersonId());
-            return CreateResponse(result);
-        }
-
-        [HttpPut("createSecret/{id:int}")]
-        [Authorize(Policy = "authorPolicy")]
-        public ActionResult<CheckpointDto> CreateCheckpointSecret([FromForm] CheckpointSecretDto secretDto, int id, [FromForm] List<IFormFile>? pictures = null)
-        {
-            if (pictures != null && pictures.Any())
+            var checkpoints = JsonSerializer.Deserialize<List<CheckpointDto>>(result);
+            if (checkpoints is null)
             {
-                var imageNames = _imageService.UploadImages(pictures);
-                secretDto.Pictures = imageNames;
+                var noTours = Result.Ok("No checkpoints found.");
+                return CreateResponse(noTours);
+
             }
 
-            var result = _checkpointService.CreateChechpointSecreat(secretDto,id, User.PersonId());
-            return CreateResponse(result);
+            var pagedResult = PaginateResult(page, pageSize, checkpoints);
+            return Ok(pagedResult);
         }
 
-        [HttpPut("updateSecret/{id:int}")]
+        [HttpGet("details/{id:long}")]
         [Authorize(Policy = "authorPolicy")]
-        public ActionResult<CheckpointDto> UpdateCheckpointSecret([FromForm] CheckpointSecretDto secretDto, int id, [FromForm] List<IFormFile>? pictures = null)
+        public async Task<ActionResult<CheckpointDto>> GetById(long id)
         {
-            if (pictures != null && pictures.Any())
+            using var response = await _httpClient.GetAsync(ConstructUrl(id.ToString()));
+            var result = await response.Content.ReadAsStringAsync();
+
+            if (!response.IsSuccessStatusCode)
             {
-                var imageNames = _imageService.UploadImages(pictures);
-                secretDto.Pictures = imageNames;
+                var errorResult = Result.Fail($"Failed to get checkpoint: {result}");
+                return CreateResponse(errorResult);
             }
 
-            var result = _checkpointService.UpdateChechpointSecreat(secretDto, id, User.PersonId());
-            return CreateResponse(result);
+            var tour = JsonSerializer.Deserialize<CheckpointDto>(result);
+            return Ok(tour);
         }
 
         [HttpPost("create/{status}")]
         [Authorize(Policy = "authorPolicy")]
-        public ActionResult<CheckpointDto> Create([FromForm] CheckpointDto checkpoint, [FromRoute] string status, [FromForm] List<IFormFile>? pictures = null)
+        public async Task<ActionResult<CheckpointDto>> Create([FromForm] CheckpointDto checkpoint, [FromRoute] string status, [FromForm] List<IFormFile>? pictures = null)
         {
             if (pictures != null && pictures.Any())
             {
@@ -101,15 +73,118 @@ namespace Explorer.API.Controllers.Author.Administration
                 checkpoint.Pictures = imageNames;
             }
 
-            var result = _checkpointService.Create(checkpoint, User.PersonId(), status);
-            return CreateResponse(result);
+            using var jsonContent = new StringContent(JsonSerializer.Serialize(checkpoint), Encoding.UTF8, "application/json");
+            using var response = await _httpClient.PostAsync("", jsonContent);
+
+            var responseContent = await response.Content.ReadAsStringAsync();
+            var result = JsonSerializer.Deserialize<CheckpointDto>(responseContent);
+
+            return CreateResponse(result.ToResult());
         }
 
-        [HttpGet]
-        public ActionResult<PagedResult<CheckpointDto>> GetAll([FromQuery] int page, [FromQuery] int pageSize)
+        [HttpPut("{id:long}")]
+        [Authorize(Policy = "authorPolicy")]
+        public async Task<ActionResult<CheckpointDto>> Update([FromForm] CheckpointDto checkpoint, long id, [FromForm] List<IFormFile>? pictures = null)
         {
-            var result = _checkpointService.GetPaged(page, pageSize);
-            return CreateResponse(result);
+            if (pictures != null && pictures.Any())
+            {
+                var imageNames = _imageService.UploadImages(pictures);
+                checkpoint.Pictures = imageNames;
+            }
+
+            using var jsonContent = new StringContent(JsonSerializer.Serialize(checkpoint), Encoding.UTF8, "application/json");
+            using var response = await _httpClient.PutAsync(ConstructUrl(id.ToString()), jsonContent);
+
+            var responseContent = await response.Content.ReadAsStringAsync();
+            var result = JsonSerializer.Deserialize<CheckpointDto>(responseContent);
+
+            return CreateResponse(result.ToResult());
         }
+
+        [HttpDelete("{id:long}")]
+        [Authorize(Policy = "authorPolicy")]
+        public async Task<ActionResult> Delete(long id)
+        {
+            using var response = await _httpClient.DeleteAsync(ConstructUrl(id.ToString()));
+
+            if (response.IsSuccessStatusCode) return NoContent();
+
+            var errorResult = Result.Fail("Failed to delete checkpoint.");
+            return CreateResponse(errorResult);
+        }
+
+        [HttpGet("{id:long}")]
+        [Authorize(Policy = "authorPolicy")]
+        public async Task<ActionResult<List<CheckpointDto>>> GetAllByTour([FromQuery] int page, [FromQuery] int pageSize, long id)
+        {
+            var requestUri = ConstructUrl(id.ToString());
+
+            using var response = await _httpClient.GetAsync(requestUri);
+            var result = await response.Content.ReadAsStringAsync();
+
+            if (!response.IsSuccessStatusCode)
+            {
+                return BadRequest($"Failed to get checkpoints for tour: {result}");
+            }
+
+            var checkpoints = JsonSerializer.Deserialize<List<CheckpointDto>>(result);
+            if (checkpoints is null)
+            {
+                var noToursCheckpoints = Result.Ok("No checkpoints for tour found.");
+                return CreateResponse(noToursCheckpoints);
+
+            }
+
+            var pagedResult = PaginateResult(page, pageSize, checkpoints);
+            return Ok(pagedResult);
+        }
+
+
+        private string ConstructUrl(string relativePath)
+        {
+            return $"{_httpClient.BaseAddress}/{relativePath}";
+        }
+
+        private static PagedResult<CheckpointDto> PaginateResult(int page, int pageSize, List<CheckpointDto> checkpoints)
+        {
+            if (page == 0 && pageSize == 0)
+            {
+                return new PagedResult<CheckpointDto>(checkpoints, checkpoints.Count);
+            }
+
+            var totalCount = checkpoints.Count;
+            var startIndex = (page - 1) * pageSize;
+            var paginatedList = checkpoints.Skip(startIndex).Take(pageSize).ToList();
+            return new PagedResult<CheckpointDto>(paginatedList, totalCount);
+        }
+
+        //// TODO - checkpoint secret
+        //[HttpPut("createSecret/{id:long}")]
+        //[Authorize(Policy = "authorPolicy")]
+        //public ActionResult<CheckpointDto> CreateCheckpointSecret([FromForm] CheckpointSecretDto secretDto, long id, [FromForm] List<IFormFile>? pictures = null)
+        //{
+        //    if (pictures != null && pictures.Any())
+        //    {
+        //        var imageNames = _imageService.UploadImages(pictures);
+        //        secretDto.Pictures = imageNames;
+        //    }
+
+        //    var result = _checkpointService.CreateChechpointSecreat(secretDto, id, User.PersonId());
+        //    return CreateResponse(result);
+        //}
+
+        //[HttpPut("updateSecret/{id:long}")]
+        //[Authorize(Policy = "authorPolicy")]
+        //public ActionResult<CheckpointDto> UpdateCheckpointSecret([FromForm] CheckpointSecretDto secretDto, long id, [FromForm] List<IFormFile>? pictures = null)
+        //{
+        //    if (pictures != null && pictures.Any())
+        //    {
+        //        var imageNames = _imageService.UploadImages(pictures);
+        //        secretDto.Pictures = imageNames;
+        //    }
+
+        //    var result = _checkpointService.UpdateChechpointSecreat(secretDto, id, User.PersonId());
+        //    return CreateResponse(result);
+        //}
     }
 }

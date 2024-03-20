@@ -120,7 +120,7 @@ namespace Explorer.Tours.Core.UseCases.Administration
             }
         }
 
-        public Result<TourPreviewDto> GetPublishedTour(int id)
+        public Result<TourPreviewDto> GetPublishedTour(long id)
         {
             try
             {

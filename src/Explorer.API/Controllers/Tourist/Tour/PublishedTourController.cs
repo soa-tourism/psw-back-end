@@ -16,13 +16,13 @@ namespace Explorer.API.Controllers.Tourist.Tour
         public PublishedTourController(IHttpClientFactory httpClientFactory)
         {
             _httpClient = httpClientFactory.CreateClient();
-            _httpClient.BaseAddress = new Uri("http://localhost:8081/v1/tours/published");
+            _httpClient.BaseAddress = new Uri("http://localhost:8081/v1/tours");
         }
 
         [HttpGet]
         public async Task<ActionResult<List<PublishedTourDto>>> GetAll()
         {
-            using var response = await _httpClient.GetAsync("");
+            using var response = await _httpClient.GetAsync(ConstructUrl("published"));
             var result = await response.Content.ReadAsStringAsync();
 
             if (!response.IsSuccessStatusCode)
@@ -41,7 +41,7 @@ namespace Explorer.API.Controllers.Tourist.Tour
         [HttpGet("{id:long}")]
         public async Task<ActionResult<PublishedTourDto>> GetPublishedTour(long id)
         {
-            using var response = await _httpClient.GetAsync(ConstructUrl(id.ToString()));
+            using var response = await _httpClient.GetAsync(ConstructUrl($"published/{id}"));
             var result = await response.Content.ReadAsStringAsync();
 
             if (!response.IsSuccessStatusCode)
@@ -52,6 +52,22 @@ namespace Explorer.API.Controllers.Tourist.Tour
 
             var tour = JsonSerializer.Deserialize<PublishedTourDto>(result);
             return Ok(tour);
+        }
+
+        [HttpGet("average/{id:long}")]
+        public async Task<ActionResult<double>> GetAverageRating(long id)
+        {
+            using var response = await _httpClient.GetAsync(ConstructUrl($"reviews/average/{id}"));
+            var result = await response.Content.ReadAsStringAsync();
+
+            if (!response.IsSuccessStatusCode)
+            {
+                var error = Result.Fail($"Failed to get tour: {result}");
+                return CreateResponse(error);
+            }
+
+            var rating = JsonSerializer.Deserialize<double>(result);
+            return Ok(rating);
         }
 
         // TODO

@@ -5,7 +5,6 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Text;
 using System.Text.Json;
-using static System.Net.Mime.MediaTypeNames;
 
 namespace Explorer.API.Controllers.Tourist
 {
@@ -23,9 +22,16 @@ namespace Explorer.API.Controllers.Tourist
         }
 
         [HttpGet]
-        public async Task<ActionResult<PagedResult<TourRatingDto>>> GetAllByTourist([FromQuery] int page, [FromQuery] int pageSize, [FromQuery] long touristId)
+        public async Task<ActionResult<PagedResult<TourRatingDto>>> GetAllReviews([FromQuery] int page, [FromQuery] int pageSize, [FromQuery] long id, [FromQuery] string type)
         {
-            using var response = await _httpClient.GetAsync(ConstructUrl($"tourist/{touristId}"));
+            var endpoint = type.ToLower() switch
+            {
+                "tourist" => $"tourist/{id}",
+                "tour" => $"tour/{id}",
+                _ => throw new ArgumentException("Invalid type. Type must be 'tourist' or 'tour'.")
+            };
+
+            using var response = await _httpClient.GetAsync(ConstructUrl(endpoint));
             var result = await response.Content.ReadAsStringAsync();
 
             if (!response.IsSuccessStatusCode)
@@ -39,13 +45,11 @@ namespace Explorer.API.Controllers.Tourist
             {
                 var noReviews = Result.Ok("No tour reviews found.");
                 return CreateResponse(noReviews);
-
             }
 
             var pagedResult = PaginateResult(page, pageSize, tourReviews);
             return Ok(pagedResult);
         }
-
 
         [HttpPost]
         public async Task<ActionResult<TourRatingDto>> Create([FromForm] TourRatingDto tourRating, [FromForm] List<IFormFile>? images = null)

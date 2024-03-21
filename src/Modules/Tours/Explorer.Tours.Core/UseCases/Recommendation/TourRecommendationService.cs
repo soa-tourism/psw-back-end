@@ -31,19 +31,19 @@ namespace Explorer.Tours.Core.UseCases.Recommendation
             List<PurchasedTourPreviewDto> filteredTours = new List<PurchasedTourPreviewDto>();
             foreach (TourExecutionDto execution in _tourExecutionService.GetActiveTourExecutions().Value)
             {
-                if (execution.Tour.Checkpoints != null)
-                {
-                    bool foundCloseEnough = false;
-                    for (int i = 0; i < execution.Tour.Checkpoints.Count; i++)
-                    {
-                        if (!foundCloseEnough && IsCloseEnough(touristLongitude, touristLatitude, execution.Tour.Checkpoints[i].Longitude, execution.Tour.Checkpoints[i].Latitude))
-                        {
-                            filteredTours.Add(execution.Tour);
-                            foundCloseEnough = true;
-                            break;
-                        }
-                    }
-                }
+                //if (execution.Tour.Checkpoints != null)
+                //{
+                //    bool foundCloseEnough = false;
+                //    for (int i = 0; i < execution.Tour.Checkpoints.Count; i++)
+                //    {
+                //        if (!foundCloseEnough && IsCloseEnough(touristLongitude, touristLatitude, execution.Tour.Checkpoints[i].Longitude, execution.Tour.Checkpoints[i].Latitude))
+                //        {
+                //            filteredTours.Add(execution.Tour);
+                //            foundCloseEnough = true;
+                //            break;
+                //        }
+                //    }
+                //}
             }
             return filteredTours;
         }

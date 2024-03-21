@@ -23,7 +23,7 @@ namespace Explorer.Tours.Core.Mappers
             TourExecutionDto result = new TourExecutionDto();
             result.Id = tourExecution.Id;
             result.TouristId = tourExecution.TouristId;
-            result.Tour = _mapper.createDto(tourExecution.Tour.FilterPurchasedTour(tourExecution.Tour));
+            //result.Tour = _mapper.createDto(tourExecution.Tour.FilterPurchasedTour(tourExecution.Tour));
             result.ExecutionStatus = tourExecution.ExecutionStatus.ToString();
             result.Start = tourExecution.Start;
             result.LastActivity = tourExecution.LastActivity;

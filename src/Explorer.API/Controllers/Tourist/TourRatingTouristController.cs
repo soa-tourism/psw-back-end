@@ -1,113 +1,117 @@
-﻿using Explorer.API.Services;
-using Explorer.BuildingBlocks.Core.UseCases;
+﻿using Explorer.BuildingBlocks.Core.UseCases;
 using Explorer.Tours.API.Dtos;
-using Explorer.Tours.API.Public.Administration;
-using Explorer.Tours.Core.Domain.RepositoryInterfaces;
-using Explorer.Tours.Core.Domain.TourExecutions;
+using FluentResults;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Explorer.Payments.API.Public;
+using System.Text;
+using System.Text.Json;
 
 namespace Explorer.API.Controllers.Tourist
 {
     [Authorize(Policy = "touristPolicy")]
-    [Route("api/tourist/tour-rating")]
+    [Route("api/tourist/tours/reviews")]
     public class TourRatingTouristController : BaseApiController
     {
-        private readonly ITourRatingService _tourRatingService;
-        private readonly IItemOwnershipService _tourOwnershipService;
-        private readonly ITourExecutionRepository _executionRepository;
-        private readonly ImageService _imageService;
+        private readonly HttpClient _httpClient;
 
-        public TourRatingTouristController(ITourRatingService tourRatingService, IItemOwnershipService tourOwnershipService, ITourExecutionRepository executionRepository)
+
+        public TourRatingTouristController(IHttpClientFactory httpClientFactory)
         {
-            _tourRatingService = tourRatingService;
-            _imageService = new ImageService();
-            _tourOwnershipService = tourOwnershipService;
-            _executionRepository = executionRepository;
+            _httpClient = httpClientFactory.CreateClient();
+            _httpClient.BaseAddress = new Uri("http://localhost:8081/v1/tours/reviews");
         }
 
         [HttpGet]
-        public ActionResult<PagedResult<TourRatingDto>> GetAll([FromQuery] int page, [FromQuery] int pageSize)
+        public async Task<ActionResult<PagedResult<TourRatingDto>>> GetAllReviews([FromQuery] int page, [FromQuery] int pageSize, [FromQuery] long id, [FromQuery] string type)
         {
-            var result = _tourRatingService.GetPaged(page, pageSize);
-            return CreateResponse(result);
-        }
+            var endpoint = type.ToLower() switch
+            {
+                "tourist" => $"tourist/{id}",
+                "tour" => $"tour/{id}",
+                _ => throw new ArgumentException("Invalid type. Type must be 'tourist' or 'tour'.")
+            };
 
-		[HttpGet("getTourRating/{id:int}")]
-		public ActionResult<TourRatingDto> GetTourRating(int id)
-		{
-			var result = _tourRatingService.GetTourRating(id);
-			return CreateResponse(result);
-		}
+            using var response = await _httpClient.GetAsync(ConstructUrl(endpoint));
+            var result = await response.Content.ReadAsStringAsync();
+
+            if (!response.IsSuccessStatusCode)
+            {
+                var error = Result.Fail($"Failed to get tour reviews: {result}");
+                return CreateResponse(error);
+            }
+
+            var tourReviews = JsonSerializer.Deserialize<List<TourRatingDto>>(result);
+            if (tourReviews is null)
+            {
+                var noReviews = Result.Ok("No tour reviews found.");
+                return CreateResponse(noReviews);
+            }
+
+            var pagedResult = PaginateResult(page, pageSize, tourReviews);
+            return Ok(pagedResult);
+        }
 
         [HttpPost]
-        public ActionResult<TourRatingDto> Create([FromForm] TourRatingDto tourRating, [FromForm] List<IFormFile>? images = null)
+        public async Task<ActionResult<TourRatingDto>> Create([FromForm] TourRatingDto tourRating, [FromForm] List<IFormFile>? images = null)
         {
-            if (tourRating.TourId == 0 || tourRating.TouristId == 0 || tourRating.Rating == 0 || tourRating.Rating > 5)
-            {
-                return BadRequest("Fill all the fields properly.");
-            }
-            List<long> customerPurchasedToursIds = _tourOwnershipService.GetPurchasedToursByUser(tourRating.TouristId).Value;
+            tourRating.Images = await ConvertToByteList(images); 
 
-            if (!customerPurchasedToursIds.Contains(tourRating.TourId))
-            {
-                return BadRequest("Unfortunately, you cannot leave a review. This tour is not in your purchased tours.");
-            }
+            using var jsonContent = new StringContent(JsonSerializer.Serialize(tourRating), Encoding.UTF8, "application/json");
+            using var response = await _httpClient.PostAsync("", jsonContent);
 
-            TourExecution tourExecution = _executionRepository.GetExactExecution(tourRating.TourId, tourRating.TouristId);
+            var responseContent = await response.Content.ReadAsStringAsync();
+            var result = JsonSerializer.Deserialize<TourRatingDto>(responseContent);
 
-            if (!tourExecution.IsTourProgressAbove35Percent())
-            {
-                return BadRequest("Unfortunately, you haven't completed enough of the tour, so you cannot leave a review.");
-            }
+            return CreateResponse(result.ToResult());
+        }
 
-            if (tourExecution.HasOneWeekPassedSinceLastActivity())
-            {
-                return BadRequest("You cannot leave a review, more than a week has passed since the tour was activated.");
-            }
-            // image upload
-            if (images != null && images.Any())
-            {
-                var imageNames = _imageService.UploadImages(images);
-                tourRating.ImageNames = imageNames;
-            }
-            var result = _tourRatingService.Create(tourRating);
-            return CreateResponse(result);
+        [HttpPut("{id:long}")]
+        public async Task<ActionResult<TourRatingDto>> Update(long id, [FromForm] TourRatingDto tourRating, [FromForm] List<IFormFile>? images = null)
+        {
+            tourRating.Images = await ConvertToByteList(images);
+
+            using var jsonContent = new StringContent(JsonSerializer.Serialize(tourRating), Encoding.UTF8, "application/json");
+            using var response = await _httpClient.PutAsync(ConstructUrl($"{id}"), jsonContent);
+
+            var responseContent = await response.Content.ReadAsStringAsync();
+            var result = JsonSerializer.Deserialize<TourRatingDto>(responseContent);
+
+            return CreateResponse(result.ToResult());
 
         }
 
-        [HttpPut("{id:int}")]
-        public ActionResult<TourRatingDto> Update([FromBody] TourRatingDto tourRating)
+        private async Task<List<byte[]>> ConvertToByteList(List<IFormFile>? images)
         {
+            var imageBytesList = new List<byte[]>();
 
-            if (tourRating.TourId == 0 || tourRating.TouristId == 0 || tourRating.Rating == 0 || tourRating.Rating > 5)
+            if (images == null) return imageBytesList;
+
+            foreach (var image in images)
             {
-                return BadRequest("Fill all the fields properly.");
+                using var ms = new MemoryStream();
+                await image.CopyToAsync(ms);
+                imageBytesList.Add(ms.ToArray());
             }
 
-            List<long> customerPurchasedToursIds = _tourOwnershipService.GetPurchasedToursByUser(tourRating.TouristId).Value;
+            return imageBytesList;
+        }
 
-            if (!customerPurchasedToursIds.Contains(tourRating.TourId))
+        private string ConstructUrl(string relativePath)
+        {
+            return $"{_httpClient.BaseAddress}/{relativePath}";
+        }
+
+        private static PagedResult<TourRatingDto> PaginateResult(int page, int pageSize, List<TourRatingDto> reviews)
+        {
+            if (page == 0 && pageSize == 0)
             {
-                return BadRequest("Unfortunately, you cannot leave a review. This tour is not in your purchased tours.");
+                return new PagedResult<TourRatingDto>(reviews, reviews.Count);
             }
 
-            TourExecution tourExecution = _executionRepository.GetExactExecution(tourRating.TourId, tourRating.TouristId);
-
-            if (!tourExecution.IsTourProgressAbove35Percent())
-            {
-                return BadRequest("Unfortunately, you haven't completed enough of the tour, so you cannot leave a review.");
-            }
-
-            if (tourExecution.HasOneWeekPassedSinceLastActivity())
-            {
-                return BadRequest("You cannot leave a review, more than a week has passed since the tour was activated.");
-            }
-
-            var result = _tourRatingService.Update(tourRating);
-            return CreateResponse(result);
-
+            var totalCount = reviews.Count;
+            var startIndex = (page - 1) * pageSize;
+            var paginatedList = reviews.Skip(startIndex).Take(pageSize).ToList();
+            return new PagedResult<TourRatingDto>(paginatedList, totalCount);
         }
     }
 }

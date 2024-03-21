@@ -28,7 +28,7 @@ public class ToursProfile : Profile
                   .ForMember(dest => dest.Category, opt => opt.MapFrom(src => MapObjectTypeFromString(src.Category)))
                   .ReverseMap();
         CreateMap<TourDto, Tour>().ReverseMap();
-        CreateMap<PublishedTourDto, PublishedTour>().ReverseMap();
+        CreateMap<PublishTourDto, PublishedTour>().ReverseMap();
         CreateMap<ArchivedTourDto, ArchivedTour>().ReverseMap();
         CreateMap<TourTimeDto, TourTime>().ReverseMap();
         CreateMap<TourExecutionDto, TourExecution>().ReverseMap();

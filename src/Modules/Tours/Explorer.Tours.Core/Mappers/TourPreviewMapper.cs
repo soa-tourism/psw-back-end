@@ -27,7 +27,7 @@ namespace Explorer.Tours.Core.Mappers
             result.AuthorId=tourPreview.AuthorId;
             result.Description=tourPreview.Description;
             result.Price=tourPreview.Price;
-            result.DemandignessLevel=tourPreview.DemandignessLevel.ToString();
+            result.Difficulty=tourPreview.DemandignessLevel.ToString();
             result.Checkpoint = checkpointMapper.CreateDto(tourPreview.Checkpoint);
             result.Tags=tourPreview.Tags;
             result.Equipment=equipmentMapper.createListDto(tourPreview.Equipment);          

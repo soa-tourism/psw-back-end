@@ -20,7 +20,6 @@ namespace Explorer.Tours.Core.UseCases.Administration
         private readonly IEquipmentRepository _equipmentRepository;
         private TourPreviewMapper _tourPreviewMapper;
         private PurchasedTourPreviewMapper _purchasedTourPreviewMapper;
-        private PublicTourMapper _publicTourMapper;
         private readonly IInternalTourOwnershipService _tourOwnershipService;
         private readonly IInternalItemService _tourItemService;
 
@@ -30,7 +29,6 @@ namespace Explorer.Tours.Core.UseCases.Administration
             _equipmentRepository = equipmentRepository;
             _tourPreviewMapper = new TourPreviewMapper();
             _purchasedTourPreviewMapper = new PurchasedTourPreviewMapper();
-            _publicTourMapper =  new PublicTourMapper();
             _tourOwnershipService = tourOwnershipService;
             _tourItemService = tourItemService;
         }
@@ -313,17 +311,6 @@ namespace Explorer.Tours.Core.UseCases.Administration
 
         }
 
-        public Result<List<PublicTourDto>> GetPublicTours()
-        {
-            List<Tour> publishedTours = _tourRepository.GetPublishedTours(); 
-            List<PublicTour> publicTours = new List<PublicTour>();
-            foreach (var tour in publishedTours)
-            {
-                publicTours.Add(tour.CreatePublicTour(tour));
-            }
-            return _publicTourMapper.createDtoList(publicTours);
-        }
-
         public double GetAverageRating(long tourId)
         {
             var tour = _tourRepository.Get(tourId);
@@ -348,28 +335,29 @@ namespace Explorer.Tours.Core.UseCases.Administration
             return _tourPreviewMapper.createDtoList(publishedToursPreviews);
         }
 
-        public Result<List<PublicTourDto>> GetToursByPublicCheckpoints(List<PublicCheckpointDto> checkpoints)
-        {
-            var tours = GetPublicTours();
-            List<PublicTourDto> result= new List<PublicTourDto>();
-            bool containsEveryCheckpoint;
-            foreach(var tour in tours.Value)
-            {
-                containsEveryCheckpoint= true;
-                foreach (var checkpoint in checkpoints)
-                {
-                    if (!tour.PreviewCheckpoints.Any(ch => ch.Longitude == checkpoint.Longitude && ch.Latitude == checkpoint.Latitude))
-                    {
-                        containsEveryCheckpoint = false;
-                    }
-                }
-                if (containsEveryCheckpoint)
-                {
-                    result.Add(tour);
-                }
-            }
-            return result;
-        }
+        // TODO
+        // public Result<List<PublicTourDto>> GetToursByPublicCheckpoints(List<PublicCheckpointDto> checkpoints)
+        // {
+        //     var tours = GetPublicTours();
+        //     List<PublicTourDto> result= new List<PublicTourDto>();
+        //     bool containsEveryCheckpoint;
+        //     foreach(var tour in tours.Value)
+        //     {
+        //         containsEveryCheckpoint= true;
+        //         foreach (var checkpoint in checkpoints)
+        //         {
+        //             if (!tour.PreviewCheckpoints.Any(ch => ch.Longitude == checkpoint.Longitude && ch.Latitude == checkpoint.Latitude))
+        //             {
+        //                 containsEveryCheckpoint = false;
+        //             }
+        //         }
+        //         if (containsEveryCheckpoint)
+        //         {
+        //             result.Add(tour);
+        //         }
+        //     }
+        //     return result;
+        // }
 
         public Result<List<TourDto>> GetTours()
         {

@@ -19,7 +19,7 @@ namespace Explorer.API.Controllers.Tourist.Tour
         public TourExecutionController(IHttpClientFactory httpClientFactory)
         {
             _httpClient = httpClientFactory.CreateClient();
-            _httpClient.BaseAddress = new Uri("http://localhost:8081/v1/execution");
+            _httpClient.BaseAddress = new Uri("http://host.docker.internal:8081/v1/execution");
         }
 
         [HttpGet]

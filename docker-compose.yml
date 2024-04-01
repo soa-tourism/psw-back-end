@@ -1,0 +1,82 @@
+version: '3.9'
+
+services:
+  explorer:
+    build:
+      dockerfile: Dockerfile
+      context: .
+      target: final
+    restart: on-failure
+    networks:
+      - database
+    ports:
+      - "44333:80"
+    environment:
+      DATABASE_HOST: explorer_db
+      DATABASE_PORT: 5432
+      DATABASE_PASSWORD: super
+      DATABASE_USER: postgres
+      DATABASE_SCHEMA: explorer
+    depends_on:
+      - explorer_db
+
+  tours: 
+    image: tours-service
+    restart: on-failure
+    networks:
+      - database
+    ports:
+      - "8081:81"
+    environment:
+      DATABASE_HOST: tours_db  
+      DATABASE_PORT: 5432  
+      DATABASE_PASSWORD: super  
+      DATABASE_USER: postgres 
+      DATABASE_SCHEMA: soa-tours 
+    depends_on:
+      - tours_db  
+
+  explorer_db:
+    image: postgres:latest
+    restart: always
+    networks:
+      - database
+    environment:
+      POSTGRES_PASSWORD: super
+      POSTGRES_USER: postgres
+      POSTGRES_DB: explorer
+    volumes:
+      - type: volume
+        source: explorer-data
+        target: /var/lib/postgresql/data
+      - type: bind
+        source: explorer-init-data.sql
+        target: /tmp/explorer-init.sql
+    ports:
+      - "5432:5432"
+
+  tours_db: 
+    image: postgres:latest
+    restart: always
+    networks:
+      - database
+    environment:
+      POSTGRES_PASSWORD: super
+      POSTGRES_USER: postgres
+      POSTGRES_DB: soa-tours 
+    volumes:
+      - type: volume
+        source: tours-data
+        target: /var/lib/postgresql/data
+    ports:
+      - "5433:5432"
+
+volumes:
+  explorer-data:
+    name: explorer-data
+  tours-data:
+    name: tours-data
+
+networks:
+  database:
+    driver: bridge

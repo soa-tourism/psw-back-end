@@ -18,7 +18,7 @@ namespace Explorer.API.Controllers.Tourist
         public TourRatingTouristController(IHttpClientFactory httpClientFactory)
         {
             _httpClient = httpClientFactory.CreateClient();
-            _httpClient.BaseAddress = new Uri("http://localhost:8081/v1/tours/reviews");
+            _httpClient.BaseAddress = new Uri("http://host.docker.internal:8081/v1/tours/reviews");
         }
 
         [HttpGet]

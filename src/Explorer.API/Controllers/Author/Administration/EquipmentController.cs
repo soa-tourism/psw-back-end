@@ -14,7 +14,7 @@ namespace Explorer.API.Controllers.Author.Administration
         public EquipmentController(IHttpClientFactory httpClientFactory)
         {
             _httpClient = httpClientFactory.CreateClient();
-            _httpClient.BaseAddress = new Uri($"http://localhost:8081/v1/tours");
+            _httpClient.BaseAddress = new Uri("http://host.docker.internal:8081/v1/tours");
         }
 
         [HttpGet("{id:long}/equipment/available")]

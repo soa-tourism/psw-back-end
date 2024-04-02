@@ -25,7 +25,7 @@ namespace Explorer.API.Controllers.Tourist.Encounters
         private readonly IInternalTouristService _personService;
 
         private static readonly HttpClient client = new HttpClient();
-        private string baseUrl = $"http://localhost:8090/touristEncounter";
+        private string baseUrl = $"http://host.docker.internal:8090/touristEncounter";
 
 
         public TouristEncounterController(IEncounterService encounterService, IInternalTouristService s)

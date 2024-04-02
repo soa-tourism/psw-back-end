@@ -24,7 +24,7 @@ namespace Explorer.API.Controllers.Author.Administration
         private readonly ImageService _imageService;
 
         private static readonly HttpClient client = new HttpClient();
-        private string baseUrl = $"http://localhost:8090/encounter";
+        private string baseUrl = $"http://host.docker.internal:8090/encounter";
 
         public EncounterController(IEncounterService encounterService)
         {

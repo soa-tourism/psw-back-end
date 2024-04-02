@@ -15,7 +15,7 @@ namespace Explorer.API.Controllers.Administrator.Administration
     {
 
         static readonly HttpClient client = new HttpClient();
-        private string baseUrl = $"http://localhost:8090/encounterRequests";
+        private string baseUrl = $"http://host.docker.internal:8090/encounterRequests";
 
         public EncounterRequestController() { }
 

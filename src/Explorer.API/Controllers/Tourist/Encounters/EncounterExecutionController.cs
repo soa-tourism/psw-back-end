@@ -20,7 +20,7 @@ namespace Explorer.API.Controllers.Tourist.Encounters
     public class EncounterExecutionController : BaseApiController
     {
         static readonly HttpClient client = new HttpClient();
-        private string baseUrl = $"http://localhost:8090/execution";
+        private string baseUrl = $"http://host.docker.internal:8090/execution";
 
 
         public EncounterExecutionController() { }

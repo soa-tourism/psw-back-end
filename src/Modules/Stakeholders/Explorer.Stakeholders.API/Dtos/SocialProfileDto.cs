@@ -2,9 +2,9 @@
 {
     public class SocialProfileDto
     {
-        public int Id { get; set; }
-        public List<UserDto> Followers { get; set; }
-        public List<UserDto> Followed { get; set; }
-        public List<UserDto> Followable { get; set; }
+        public long userId { get; set; }
+        public string username { get; set; }
+        public List<UserDto> followers { get; set; }
+        public List<UserDto> following { get; set; }
     }
 }

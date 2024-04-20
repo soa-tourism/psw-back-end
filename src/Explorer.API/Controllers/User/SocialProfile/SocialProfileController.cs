@@ -110,6 +110,35 @@ namespace Explorer.API.Controllers.User.SocialProfile
             }
         }
 
+        // TODO - fix recommended
+        [HttpGet("get-recommended/{userId:long}")]
+        public async Task<ActionResult<SocialProfileDto>> GetRecommended(long userId)
+        {
+            if (!(User.PersonId().ToString()).Equals(userId.ToString()))
+            {
+                return Forbid();
+            }
+
+            using var response = await _httpClient.GetAsync(ConstructUrl("profiles/recommend/" + userId.ToString()));
+            var result = await response.Content.ReadAsStringAsync();
+
+            if (!response.IsSuccessStatusCode)
+            {
+                var errorResult = Result.Fail($"Failed to get social profile recommended: {result}");
+                return CreateResponse(errorResult);
+            }
+
+            try
+            {
+                var profiles = JsonSerializer.Deserialize<List<SocialProfileDto>>(result);
+                return Ok(profiles);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError);
+            }
+        }
+
         // TODO - fix follow
         [HttpPost("follow/{userId:long}/{followedId:long}")]
         public async Task<ActionResult<SocialProfileDto>> Follow(long userId, long followedId)

@@ -1,13 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using System.Threading.Tasks;
 using Explorer.BuildingBlocks.Core.Domain;
 using Explorer.Encounters.Core.Domain.Encounters;
-using Explorer.Tours.Core.Domain.TourExecutions;
 
 namespace Explorer.Encounters.Core.Domain.Converters
 {

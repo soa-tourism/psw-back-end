@@ -1,11 +1,11 @@
 ﻿using Explorer.API.Services;
 using Explorer.BuildingBlocks.Core.UseCases;
-using Explorer.Tours.API.Dtos;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using FluentResults;
 using System.Text;
 using System.Text.Json;
+using Explorer.API.Dtos.Tours;
 
 namespace Explorer.API.Controllers.Author.Administration
 {

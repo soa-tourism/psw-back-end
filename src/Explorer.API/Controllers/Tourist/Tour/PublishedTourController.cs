@@ -1,5 +1,5 @@
 ﻿using System.Text.Json;
-using Explorer.Tours.API.Dtos;
+using Explorer.API.Dtos.Tours;
 using FluentResults;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;

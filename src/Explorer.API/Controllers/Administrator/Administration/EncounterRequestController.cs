@@ -1,10 +1,7 @@
-﻿using Explorer.BuildingBlocks.Core.UseCases;
-using Explorer.Encounters.API.Dtos;
-using Explorer.Encounters.API.Public;
+﻿using Explorer.Encounters.API.Dtos;
 using FluentResults;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System.Text;
 using System.Text.Json;
 
 namespace Explorer.API.Controllers.Administrator.Administration

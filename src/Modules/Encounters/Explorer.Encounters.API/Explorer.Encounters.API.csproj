@@ -7,11 +7,11 @@
   </PropertyGroup>
 
   <ItemGroup>
-	  <ProjectReference Include="..\..\Tours\Explorer.Tours.API\Explorer.Tours.API.csproj" />
 
 	  <ProjectReference Include="..\..\..\BuildingBlocks\Explorer.BuildingBlocks.Core\Explorer.BuildingBlocks.Core.csproj" />
   </ItemGroup>
 	<ItemGroup>
+		<Folder Include="Dtos\" />
 		<Folder Include="Internal\" />
 	</ItemGroup>
 

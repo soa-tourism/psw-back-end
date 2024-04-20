@@ -1,8 +1,4 @@
-﻿using Explorer.BuildingBlocks.Core.Domain;
-using Explorer.Tours.Core.Domain.TourExecutions;
-using System.Text.Json.Serialization;
-
-namespace Explorer.Encounters.Core.Domain.Encounters
+﻿namespace Explorer.Encounters.Core.Domain.Encounters
 {
     public class SocialEncounter : Encounter
     {

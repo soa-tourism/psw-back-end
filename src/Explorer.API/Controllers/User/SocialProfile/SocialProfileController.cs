@@ -73,6 +73,11 @@ namespace Explorer.API.Controllers.User.SocialProfile
 
             try
             {
+                if (string.IsNullOrEmpty(result))
+                {   // Return an empty list if there are no following profiles
+                    return Ok(new List<SocialProfileDto>());
+                }
+
                 var profiles = JsonSerializer.Deserialize<List<SocialProfileDto>>(result); // Deserialization
                 return Ok(profiles);
             }
@@ -101,6 +106,11 @@ namespace Explorer.API.Controllers.User.SocialProfile
 
             try
             {
+                if (string.IsNullOrEmpty(result))
+                {   // Return an empty list if there are no following profiles
+                    return Ok(new List<SocialProfileDto>());
+                }
+
                 var profiles = JsonSerializer.Deserialize<List<SocialProfileDto>>(result); // Deserialization
                 return Ok(profiles);
             }
@@ -110,7 +120,6 @@ namespace Explorer.API.Controllers.User.SocialProfile
             }
         }
 
-        // TODO - fix recommended
         [HttpGet("get-recommended/{userId:long}")]
         public async Task<ActionResult<SocialProfileDto>> GetRecommended(long userId)
         {
@@ -139,16 +148,15 @@ namespace Explorer.API.Controllers.User.SocialProfile
             }
         }
 
-        // TODO - fix follow
-        [HttpPost("follow/{userId:long}/{followedId:long}")]
-        public async Task<ActionResult<SocialProfileDto>> Follow(long userId, long followedId)
+        [HttpPut("follow/{userId:long}/{followerId:long}")]
+        public async Task<ActionResult<SocialProfileDto>> Follow(long userId, long followerId)
         {
-            if (!(User.PersonId().ToString()).Equals(userId.ToString()))
+            if (!(User.PersonId().ToString()).Equals(followerId.ToString()))
             {
                 return Forbid();
             }
 
-            using var response = await _httpClient.PostAsync(ConstructUrl("profiles/follow/" + userId.ToString() + "/" + followedId.ToString()), new StringContent(""));
+            using var response = await _httpClient.PutAsync(ConstructUrl("profiles/follow/" + userId.ToString() + "/" + followerId.ToString()), new StringContent(""));
             var result = await response.Content.ReadAsStringAsync();
 
             if (!response.IsSuccessStatusCode)
@@ -156,28 +164,18 @@ namespace Explorer.API.Controllers.User.SocialProfile
                 var errorResult = Result.Fail($"Failed to follow social profile: {result}");
                 return CreateResponse(errorResult);
             }
-
-            try
-            {
-                var profiles = JsonSerializer.Deserialize<List<SocialProfileDto>>(result); // Deserialization
-                return Ok(profiles);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(StatusCodes.Status500InternalServerError); // Log or handle the exception
-            }
+            return Ok();
         }
 
-        // TODO - fix unfollow
-        [HttpDelete("unfollow/{userId:long}/{followedId:long}")]
-        public async Task<ActionResult<SocialProfileDto>> Unfollow(long userId, long followedId)
+        [HttpDelete("unfollow/{followedId:long}/{userId:long}")]
+        public async Task<ActionResult<SocialProfileDto>> Unfollow(long followedId, long userId)
         {
             if (!(User.PersonId().ToString()).Equals(userId.ToString()))
             {
                 return Forbid();
             }
 
-            using var response = await _httpClient.DeleteAsync(ConstructUrl("profiles/unfollow/" + userId.ToString() + "/" + followedId.ToString()));
+            using var response = await _httpClient.DeleteAsync(ConstructUrl("profiles/unfollow/" + followedId.ToString() + "/" + userId.ToString()));
             var result = await response.Content.ReadAsStringAsync();
 
             if (!response.IsSuccessStatusCode)
@@ -185,16 +183,7 @@ namespace Explorer.API.Controllers.User.SocialProfile
                 var errorResult = Result.Fail($"Failed to unfollow social profile: {result}");
                 return CreateResponse(errorResult);
             }
-
-            try
-            {
-                var profiles = JsonSerializer.Deserialize<List<SocialProfileDto>>(result); // Deserialization
-                return Ok(profiles);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(StatusCodes.Status500InternalServerError); // Log or handle the exception
-            }
+            return Ok();
         }
 
         private string ConstructUrl(string relativePath)

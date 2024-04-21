@@ -4,7 +4,7 @@
     {
         public long userId { get; set; }
         public string username { get; set; }
-        public List<UserDto> followers { get; set; }
-        public List<UserDto> following { get; set; }
+        public List<SocialProfileDto> followers { get; set; }
+        public List<SocialProfileDto> following { get; set; }
     }
 }

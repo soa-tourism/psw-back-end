@@ -63,6 +63,17 @@ public class BlogPostController : BaseApiController
         return CreateResponse(result);
     }
 
+    [HttpGet("followers/{userId:long}")]
+    [Authorize(Policy = "userPolicy")]
+    public ActionResult<PagedResult<BlogPostDto>> GetAllByFollowing([FromQuery] int page, [FromQuery] int pageSize, int userId)
+    {
+        if (User.PersonId() != userId) return CreateResponse(Result.Fail(FailureCode.Forbidden));
+
+        var result = _blogPostService.GetAllByFollowing(page, pageSize, userId);
+        return CreateResponse(result);
+    }
+
+
     [HttpPut("{id:int}")]
     [Authorize(Policy = "userPolicy")]
     public ActionResult<BlogPostDto> Update(int id, [FromForm] BlogPostDto blogPost, [FromForm] List<IFormFile>? images = null)

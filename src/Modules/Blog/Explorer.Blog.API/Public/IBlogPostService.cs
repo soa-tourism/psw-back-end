@@ -8,6 +8,7 @@ public interface IBlogPostService
 {
     Result<PagedResult<BlogPostDto>> GetAllNonDraft(int page, int pageSize);
     Result<PagedResult<BlogPostDto>> GetAllByUser(int page, int pageSize, int id);
+    Result<PagedResult<BlogPostDto>> GetAllByFollowing(int page, int pageSize, int id);
     Result<PagedResult<BlogPostDto>> GetFilteredByStatus(int page, int pageSize, string blogPostStatus);
     Result<BlogPostDto> Get(int id);
     Result<BlogPostDto> Create(BlogPostDto blogPost);

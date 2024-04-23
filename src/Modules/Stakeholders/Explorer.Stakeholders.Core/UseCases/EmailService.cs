@@ -2,14 +2,7 @@
 using Explorer.Stakeholders.API.Public;
 using MailKit.Net.Smtp;
 using MimeKit;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using Microsoft.Extensions.Configuration;
-using System.Threading.Tasks;
-using Explorer.Tours.API.Dtos;
-using System.Security.Principal;
 
 namespace Explorer.Stakeholders.Core.UseCases
 {

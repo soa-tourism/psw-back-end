@@ -32,13 +32,9 @@ ENV DATABASE_USERNAME=""
 
 ENV STAKEHOLDERS_TARGET_PROJECT=Explorer.Stakeholders.Infrastructure
 
-ENV TOURS_TARGET_PROJECT=Explorer.Tours.Infrastructure
-
 ENV BLOG_TARGET_PROJECT=Explorer.Blog.Infrastructure
 
 ENV PAYMENTS_TARGET_PROJECT=Explorer.Payments.Infrastructure
-
-ENV ENCOUNTERS_TARGET_PROJECT=Explorer.Encounters.Infrastructure
 
 
 CMD PATH="$PATH:/root/.dotnet/tools" \
@@ -52,16 +48,6 @@ CMD PATH="$PATH:/root/.dotnet/tools" \
         -s "${STARTUP_PROJECT}/${STARTUP_PROJECT}.csproj" \
         -p "Modules/Stakeholders/${STAKEHOLDERS_TARGET_PROJECT}/${STAKEHOLDERS_TARGET_PROJECT}.csproj" \
         -c "StakeholdersContext" \
-        --configuration Release && \
-    dotnet-ef migrations add "${MIGRATION}-tours" \
-        -s "${STARTUP_PROJECT}/${STARTUP_PROJECT}.csproj" \
-        -p "Modules/Tours/${TOURS_TARGET_PROJECT}/${TOURS_TARGET_PROJECT}.csproj" \
-        -c "ToursContext" \
-        --configuration Release && \  
-    dotnet-ef database update "${MIGRATION}-tours" \
-        -s "${STARTUP_PROJECT}/${STARTUP_PROJECT}.csproj" \
-        -p "Modules/Tours/${TOURS_TARGET_PROJECT}/${TOURS_TARGET_PROJECT}.csproj" \
-        -c "ToursContext" \
         --configuration Release && \
     dotnet-ef migrations add "${MIGRATION}-blog" \
         -s "${STARTUP_PROJECT}/${STARTUP_PROJECT}.csproj" \
@@ -82,15 +68,5 @@ CMD PATH="$PATH:/root/.dotnet/tools" \
         -s "${STARTUP_PROJECT}/${STARTUP_PROJECT}.csproj" \
         -p "Modules/Payments/${PAYMENTS_TARGET_PROJECT}/${PAYMENTS_TARGET_PROJECT}.csproj" \
         -c "PaymentsContext" \
-    --configuration Release && \
-    dotnet-ef migrations add "${MIGRATION}-encounters" \
-        -s "${STARTUP_PROJECT}/${STARTUP_PROJECT}.csproj" \
-        -p "Modules/Encounters/${ENCOUNTERS_TARGET_PROJECT}/${ENCOUNTERS_TARGET_PROJECT}.csproj" \
-        -c "EncountersContext" \
-    --configuration Release && \
-    dotnet-ef database update "${MIGRATION}-encounters" \
-        -s "${STARTUP_PROJECT}/${STARTUP_PROJECT}.csproj" \
-        -p "Modules/Encounters/${ENCOUNTERS_TARGET_PROJECT}/${ENCOUNTERS_TARGET_PROJECT}.csproj" \
-        -c "EncountersContext" \
     --configuration Release 
 

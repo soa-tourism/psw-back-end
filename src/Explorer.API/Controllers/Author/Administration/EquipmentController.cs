@@ -1,7 +1,7 @@
-﻿using Explorer.Tours.API.Dtos;
-using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Text.Json;
+using Explorer.API.Dtos.Tours;
 
 namespace Explorer.API.Controllers.Author.Administration
 {
@@ -14,11 +14,11 @@ namespace Explorer.API.Controllers.Author.Administration
         public EquipmentController(IHttpClientFactory httpClientFactory)
         {
             _httpClient = httpClientFactory.CreateClient();
-            _httpClient.BaseAddress = new Uri("http://host.docker.internal:8081/v1/tours");
+            _httpClient.BaseAddress = new Uri("http://host.docker.internal:8083/v1/tours");
         }
 
-        [HttpGet("{id:long}/equipment/available")]
-        public async Task<ActionResult<List<EquipmentDto>>> GetAvailableEquipment(long id, [FromQuery] List<long>? equipmentIds)
+        [HttpGet("{id}/equipment/available")]
+        public async Task<ActionResult<List<EquipmentDto>>> GetAvailableEquipment(string id, [FromQuery] List<string>? equipmentIds)
         {
             var requestUri = ConstructUrl($"{id}/equipment/available", equipmentIds);
 
@@ -34,7 +34,7 @@ namespace Explorer.API.Controllers.Author.Administration
             return Ok(equipment);
         }
 
-        private string ConstructUrl(string relativePath, List<long>? equipmentIds)
+        private string ConstructUrl(string relativePath, List<string>? equipmentIds)
         {
             var requestUri = $"{_httpClient.BaseAddress}/{relativePath}";
 

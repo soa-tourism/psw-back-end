@@ -1,7 +1,6 @@
 ﻿using System.Text.Json.Serialization;
 using Explorer.BuildingBlocks.Core.Domain;
 using Explorer.Encounters.Core.Domain.Converters;
-using Explorer.Tours.Core.Domain.TourExecutions;
 
 namespace Explorer.Encounters.Core.Domain.Encounters
 {

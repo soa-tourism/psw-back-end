@@ -1,5 +1,5 @@
-﻿using Explorer.BuildingBlocks.Core.UseCases;
-using Explorer.Tours.API.Dtos;
+﻿using Explorer.API.Dtos.Tours;
+using Explorer.BuildingBlocks.Core.UseCases;
 using FluentResults;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -19,7 +19,7 @@ namespace Explorer.API.Controllers.Tourist.Tourism
         public TouristPositionController(IHttpClientFactory httpClientFactory)
         {
             _httpClient = httpClientFactory.CreateClient();
-            _httpClient.BaseAddress = new Uri("http://host.docker.internal:8081/v1/position");
+            _httpClient.BaseAddress = new Uri("http://host.docker.internal:8083/v1/position");
         }
 
         [HttpGet]
@@ -46,10 +46,10 @@ namespace Explorer.API.Controllers.Tourist.Tourism
             return Ok(pagedResult);
         }
 
-        [HttpGet("/{id:long}")]
-        public async Task<ActionResult<List<TouristPositionDto>>> GetPositionByCreator([FromQuery] int page, [FromQuery] int pageSize, long id)
+        [HttpGet("/{id}")]
+        public async Task<ActionResult<List<TouristPositionDto>>> GetPositionByCreator([FromQuery] int page, [FromQuery] int pageSize, string id)
         {
-            using var response = await _httpClient.GetAsync(ConstructUrl(id.ToString()));
+            using var response = await _httpClient.GetAsync(ConstructUrl(id));
             var result = await response.Content.ReadAsStringAsync();
 
             if (!response.IsSuccessStatusCode)
@@ -74,11 +74,11 @@ namespace Explorer.API.Controllers.Tourist.Tourism
             return CreateResponse(result.ToResult());
         }
 
-        [HttpPut("{id:long}")]
-        public async Task<ActionResult<TouristPositionDto>> Update([FromBody] TouristPositionDto position, long id)
+        [HttpPut("{id}")]
+        public async Task<ActionResult<TouristPositionDto>> Update([FromBody] TouristPositionDto position, string id)
         {
             using var jsonContent = new StringContent(JsonSerializer.Serialize(position), Encoding.UTF8, "application/json");
-            using var response = await _httpClient.PutAsync(ConstructUrl(id.ToString()), jsonContent);
+            using var response = await _httpClient.PutAsync(ConstructUrl(id), jsonContent);
 
             var responseContent = await response.Content.ReadAsStringAsync();
             var result = JsonSerializer.Deserialize<TouristPositionDto>(responseContent);
@@ -86,10 +86,10 @@ namespace Explorer.API.Controllers.Tourist.Tourism
             return CreateResponse(result.ToResult());
         }
 
-        [HttpDelete("{id:long}")]
-        public async Task<ActionResult> Delete(long id)
+        [HttpDelete("{id}")]
+        public async Task<ActionResult> Delete(string id)
         {
-            using var response = await _httpClient.DeleteAsync(ConstructUrl(id.ToString()));
+            using var response = await _httpClient.DeleteAsync(ConstructUrl(id));
 
             if (response.IsSuccessStatusCode) return NoContent();
 

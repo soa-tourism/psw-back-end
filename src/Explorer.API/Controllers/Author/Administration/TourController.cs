@@ -1,10 +1,10 @@
 ﻿using Explorer.BuildingBlocks.Core.UseCases;
-using Explorer.Tours.API.Dtos;
 using FluentResults;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Text;
 using System.Text.Json;
+using Explorer.API.Dtos.Tours;
 
 namespace Explorer.API.Controllers.Author.Administration
 {
@@ -17,7 +17,7 @@ namespace Explorer.API.Controllers.Author.Administration
         public TourController(IHttpClientFactory httpClientFactory)
         {
             _httpClient = httpClientFactory.CreateClient();
-            _httpClient.BaseAddress = new Uri("http://host.docker.internal:8081/v1/tours");
+            _httpClient.BaseAddress = new Uri("http://host.docker.internal:8083/v1/tours");
         }
 
 
@@ -45,10 +45,10 @@ namespace Explorer.API.Controllers.Author.Administration
             return Ok(pagedResult);
         }
 
-        [HttpGet("{id:long}")]
-        public async Task<ActionResult<BasicTourDto>> GetById(long id)
+        [HttpGet("{id}")]
+        public async Task<ActionResult<BasicTourDto>> GetById(string id)
         {
-            using var response = await _httpClient.GetAsync(ConstructUrl(id.ToString()));
+            using var response = await _httpClient.GetAsync(ConstructUrl(id));
             var result = await response.Content.ReadAsStringAsync();
 
             if (!response.IsSuccessStatusCode)
@@ -73,11 +73,11 @@ namespace Explorer.API.Controllers.Author.Administration
             return CreateResponse(result.ToResult());
         }
 
-        [HttpPut("{id:long}")]
-        public async Task<ActionResult<BasicTourDto>> Update([FromBody] BasicTourDto tour, long id)
+        [HttpPut("{id}")]
+        public async Task<ActionResult<BasicTourDto>> Update([FromBody] BasicTourDto tour, string id)
         {
             using var jsonContent = new StringContent(JsonSerializer.Serialize(tour), Encoding.UTF8, "application/json");
-            using var response = await _httpClient.PutAsync(ConstructUrl(id.ToString()), jsonContent);
+            using var response = await _httpClient.PutAsync(ConstructUrl(id), jsonContent);
 
             var responseContent = await response.Content.ReadAsStringAsync();
             var result = JsonSerializer.Deserialize<BasicTourDto>(responseContent);
@@ -85,8 +85,8 @@ namespace Explorer.API.Controllers.Author.Administration
             return CreateResponse(result.ToResult());
         }
 
-        [HttpDelete("{id:long}")]
-        public async Task<ActionResult> Delete(long id)
+        [HttpDelete("{id}")]
+        public async Task<ActionResult> Delete(string id)
         {
             using var response = await _httpClient.DeleteAsync(ConstructUrl(id.ToString()));
 
@@ -121,8 +121,8 @@ namespace Explorer.API.Controllers.Author.Administration
             return Ok(pagedResult);
         }
 
-        [HttpPost("{id:long}/equipment/{equipmentId:long}")]
-        public async Task<ActionResult> AddEquipment(long id, long equipmentId)
+        [HttpPost("{id}/equipment/{equipmentId}")]
+        public async Task<ActionResult> AddEquipment(string id, string equipmentId)
         {
             using var response = await _httpClient.PostAsync(ConstructUrl($"{id}/equipment/{equipmentId}"), null);
 
@@ -132,8 +132,8 @@ namespace Explorer.API.Controllers.Author.Administration
             return CreateResponse(errorResult);
         }
 
-        [HttpDelete("{id:long}/equipment/{equipmentId:long}")]
-        public async Task<ActionResult> RemoveEquipment(long id, long equipmentId)
+        [HttpDelete("{id}/equipment/{equipmentId}")]
+        public async Task<ActionResult> RemoveEquipment(string id, string equipmentId)
         {
             using var response = await _httpClient.DeleteAsync(ConstructUrl($"{id}/equipment/{equipmentId}"));
 

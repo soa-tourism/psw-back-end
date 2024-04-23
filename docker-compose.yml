@@ -39,18 +39,13 @@ services:
   tours: 
     image: tours-service
     restart: on-failure
-    networks:
-      - database
     ports:
-      - "8081:81"
+      - "8083:8083"
     environment:
-      DATABASE_HOST: tours_db  
-      DATABASE_PORT: 5432  
-      DATABASE_PASSWORD: super  
-      DATABASE_USER: postgres 
-      DATABASE_SCHEMA: soa-tours 
+      - MONGO_DB_URI=mongodb://root:pass@mongo:27017
     depends_on:
-      - tours_db  
+      mongo:
+        condition: service_healthy
 
   explorer_db:
     image: postgres:latest
@@ -71,27 +66,45 @@ services:
     ports:
       - "5432:5432"
 
-  tours_db: 
-    image: postgres:latest
+  mongo:
+    image: mongo
     restart: always
-    networks:
-      - database
-    environment:
-      POSTGRES_PASSWORD: super
-      POSTGRES_USER: postgres
-      POSTGRES_DB: soa-tours 
-    volumes:
-      - type: volume
-        source: tours-data
-        target: /var/lib/postgresql/data
     ports:
-      - "5433:5432"
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: pass
+      MONGO_INITDB_DATABASE: mongo
+    healthcheck:
+      test: echo 'db.runCommand("ping").ok'
+      interval: 10s
+      timeout: 10s
+      retries: 10
+    volumes:
+      - mongo_store:/data/db
+    
+  mongo-express:
+    image: mongo-express:latest
+    restart: always
+    environment:
+      - ME_CONFIG_MONGODB_SERVER=mongo
+      - ME_CONFIG_MONGODB_ADMINUSERNAME=root
+      - ME_CONFIG_MONGODB_ADMINPASSWORD=pass
+      - ME_CONFIG_BASICAUTH_USERNAME=admin
+      - ME_CONFIG_BASICAUTH_PASSWORD=example
+      - ME_CONFIG_MONGODB_URL=mongodb://mongo:27017/
+    depends_on:
+      - mongo
+    ports:
+      - "8081:8081"
+    volumes:
+      - mongo_express_data:/data/db
 
 volumes:
   explorer-data:
     name: explorer-data
-  tours-data:
-    name: tours-data
+  mongo_store:
+  mongo_express_data:
 
 networks:
   database:

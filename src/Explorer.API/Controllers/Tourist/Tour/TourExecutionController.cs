@@ -1,11 +1,11 @@
 ﻿using Explorer.Stakeholders.Infrastructure.Authentication;
 using Explorer.BuildingBlocks.Core.UseCases;
-using Explorer.Tours.API.Dtos;
 using FluentResults;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Text;
 using System.Text.Json;
+using Explorer.API.Dtos.Tours;
 
 
 namespace Explorer.API.Controllers.Tourist.Tour
@@ -19,7 +19,7 @@ namespace Explorer.API.Controllers.Tourist.Tour
         public TourExecutionController(IHttpClientFactory httpClientFactory)
         {
             _httpClient = httpClientFactory.CreateClient();
-            _httpClient.BaseAddress = new Uri("http://host.docker.internal:8081/v1/execution");
+            _httpClient.BaseAddress = new Uri("http://host.docker.internal:8083/v1/execution");
         }
 
         [HttpGet]
@@ -46,10 +46,10 @@ namespace Explorer.API.Controllers.Tourist.Tour
             return Ok(pagedResult);
         }
 
-        [HttpGet("{id:long}")]
-        public async Task<ActionResult<TourExecutionDto>> GetById(long id)
+        [HttpGet("{id}")]
+        public async Task<ActionResult<TourExecutionDto>> GetById(string id)
         {
-            using var response = await _httpClient.GetAsync(ConstructUrl(id.ToString()));
+            using var response = await _httpClient.GetAsync(ConstructUrl(id));
             var result = await response.Content.ReadAsStringAsync();
 
             if (!response.IsSuccessStatusCode)
@@ -62,16 +62,18 @@ namespace Explorer.API.Controllers.Tourist.Tour
             return Ok(execution);
         }
 
-        [HttpPost("{tourId:long}")]
-        public async Task<ActionResult<TourExecutionDto>> Create(long tourId)
+        [HttpPost("{tourId}")]
+        public async Task<ActionResult<TourExecutionDto>> Create(string tourId)
         {
-            TourExecutionDto dto = new TourExecutionDto();
-            dto.TourId = tourId;
-            dto.TouristId = User.PersonId();
-            dto.Start = DateTime.Now;
-            dto.LastActivity = DateTime.Now;
-            dto.ExecutionStatus = "InProgress";
-            dto.CompletedCheckpoints = new List<CheckpointCompletitionDto>();
+            var dto = new TourExecutionDto
+            {
+                TourId = tourId,
+                TouristId = User.PersonId(),
+                Start = DateTime.Now,
+                LastActivity = DateTime.Now,
+                ExecutionStatus = "InProgress",
+                CompletedCheckpoints = new List<CheckpointCompletitionDto>()
+            };
 
             using var jsonContent = new StringContent(JsonSerializer.Serialize(dto), Encoding.UTF8, "application/json");
             using var response = await _httpClient.PostAsync("", jsonContent);
@@ -82,11 +84,11 @@ namespace Explorer.API.Controllers.Tourist.Tour
             return CreateResponse(result.ToResult());
         }
 
-        [HttpPut("{id:long}")]
-        public async Task<ActionResult<TourExecutionDto>> Update([FromBody] TourExecutionDto execution, long id)
+        [HttpPut("{id}")]
+        public async Task<ActionResult<TourExecutionDto>> Update([FromBody] TourExecutionDto execution, string id)
         {
             using var jsonContent = new StringContent(JsonSerializer.Serialize(execution), Encoding.UTF8, "application/json");
-            using var response = await _httpClient.PutAsync(ConstructUrl(id.ToString()), jsonContent);
+            using var response = await _httpClient.PutAsync(ConstructUrl(id), jsonContent);
 
             var responseContent = await response.Content.ReadAsStringAsync();
             var result = JsonSerializer.Deserialize<TourExecutionDto>(responseContent);
@@ -94,10 +96,10 @@ namespace Explorer.API.Controllers.Tourist.Tour
             return CreateResponse(result.ToResult());
         }
 
-        [HttpDelete("{id:long}")]
-        public async Task<ActionResult> Delete(long id)
+        [HttpDelete("{id}")]
+        public async Task<ActionResult> Delete(string id)
         {
-            using var response = await _httpClient.DeleteAsync(ConstructUrl(id.ToString()));
+            using var response = await _httpClient.DeleteAsync(ConstructUrl(id));
 
             if (response.IsSuccessStatusCode) return NoContent();
 
@@ -105,8 +107,8 @@ namespace Explorer.API.Controllers.Tourist.Tour
             return CreateResponse(errorResult);
         }
 
-        [HttpGet("all/{tourId:long}/{touristId:long}")]
-        public async Task<ActionResult<List<TourExecutionDto>>> GetByTouristAndTour(long tourId, long touristId)
+        [HttpGet("all/{tourId}/{touristId:long}")]
+        public async Task<ActionResult<List<TourExecutionDto>>> GetByTouristAndTour(string tourId, long touristId)
         {
             var requestUri = ConstructUrl($"all/{tourId}/{touristId}");
 
@@ -130,8 +132,8 @@ namespace Explorer.API.Controllers.Tourist.Tour
             return Ok(pagedResult);
         }
 
-        [HttpGet("{tourId:long}/{touristId:long}")]
-        public async Task<ActionResult<List<TourExecutionDto>>> GetActiveByTouristAndTour(long tourId, long touristId)
+        [HttpGet("{tourId}/{touristId:long}")]
+        public async Task<ActionResult<List<TourExecutionDto>>> GetActiveByTouristAndTour(string tourId, long touristId)
         {
             var requestUri = ConstructUrl($"{tourId}/{touristId}");
 

@@ -1,10 +1,7 @@
 ﻿using Explorer.API.Services;
 using Explorer.BuildingBlocks.Core.UseCases;
 using Explorer.Encounters.API.Dtos;
-using Explorer.Encounters.API.Public;
-using Explorer.Encounters.Core.UseCases;
 using Explorer.Stakeholders.Infrastructure.Authentication;
-using Explorer.Tours.API.Dtos;
 using FluentResults;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -12,15 +9,12 @@ using System.Globalization;
 using System.Text.Json;
 using System.Text;
 using Explorer.Stakeholders.API.Internal;
-using Explorer.Stakeholders.Core.Domain;
-using Explorer.Stakeholders.Core.UseCases;
 
 namespace Explorer.API.Controllers.Tourist.Encounters
 {
     [Route("api/administration/touristEncounter")]
     public class TouristEncounterController : BaseApiController
     {
-        private readonly IEncounterService _encounterService;
         private readonly ImageService _imageService;
         private readonly IInternalTouristService _personService;
 
@@ -28,9 +22,8 @@ namespace Explorer.API.Controllers.Tourist.Encounters
         private string baseUrl = $"http://host.docker.internal:8090/touristEncounter";
 
 
-        public TouristEncounterController(IEncounterService encounterService, IInternalTouristService s)
+        public TouristEncounterController(IInternalTouristService s)
         {
-            _encounterService = encounterService;
             _imageService = new ImageService();
             _personService = s;
         }

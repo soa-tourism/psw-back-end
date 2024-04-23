@@ -16,8 +16,8 @@ namespace Explorer.API.Controllers.User.SocialProfile
         public SocialProfileController(IHttpClientFactory httpClientFactory)
         {
             _httpClient = httpClientFactory.CreateClient();
-            //_httpClient.BaseAddress = new Uri("http://host.docker.internal:8082");
-            _httpClient.BaseAddress = new Uri("http://localhost:8082");
+            _httpClient.BaseAddress = new Uri("http://host.docker.internal:8082");
+            //_httpClient.BaseAddress = new Uri("http://localhost:8082");
         }
 
         [HttpGet("get/{userId:long}")]

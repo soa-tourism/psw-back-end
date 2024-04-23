@@ -26,8 +26,8 @@ public class AuthenticationController : BaseApiController
         _imageService = new ImageService();
         _verificationService = verificationService;
         _httpClient = httpClientFactory.CreateClient();
-        //_httpClient.BaseAddress = new Uri("http://host.docker.internal:8082");
-        _httpClient.BaseAddress = new Uri("http://localhost:8082");
+        _httpClient.BaseAddress = new Uri("http://host.docker.internal:8082");
+        //_httpClient.BaseAddress = new Uri("http://localhost:8082");
         _userService = userService;
     }
 

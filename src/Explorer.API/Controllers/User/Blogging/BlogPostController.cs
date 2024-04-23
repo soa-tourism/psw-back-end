@@ -1,11 +1,15 @@
 using Explorer.API.Services;
 using Explorer.Blog.API.Dtos;
 using Explorer.Blog.API.Public;
+using Explorer.Blog.Core.Domain.BlogPosts;
 using Explorer.BuildingBlocks.Core.UseCases;
+using Explorer.Stakeholders.API.Dtos;
 using Explorer.Stakeholders.Infrastructure.Authentication;
 using FluentResults;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Net.Http;
+using System.Text.Json;
 
 namespace Explorer.API.Controllers.User.Blogging;
 
@@ -14,11 +18,13 @@ public class BlogPostController : BaseApiController
 {
     private readonly IBlogPostService _blogPostService;
     private readonly ImageService _imageService;
+    private readonly HttpClient _httpClient;
 
-    public BlogPostController(IBlogPostService blogPostService)
+    public BlogPostController(IBlogPostService blogPostService, HttpClient httpClient)
     {
         _blogPostService = blogPostService;
         _imageService = new ImageService();
+        _httpClient = httpClient;
     }
 
     [HttpGet]
@@ -65,12 +71,27 @@ public class BlogPostController : BaseApiController
 
     [HttpGet("followers/{userId:long}")]
     [Authorize(Policy = "userPolicy")]
-    public ActionResult<PagedResult<BlogPostDto>> GetAllByFollowing([FromQuery] int page, [FromQuery] int pageSize, int userId)
+    public async Task<ActionResult<PagedResult<BlogPostDto>>> GetAllByFollowing(long userId)
     {
         if (User.PersonId() != userId) return CreateResponse(Result.Fail(FailureCode.Forbidden));
 
-        var result = _blogPostService.GetAllByFollowing(page, pageSize, userId);
-        return CreateResponse(result);
+        var followersResponse = await _httpClient.GetAsync($"http://host.docker.internal:8082/profiles/following/{userId}");
+        if (!followersResponse.IsSuccessStatusCode)
+        {
+            return StatusCode((int)followersResponse.StatusCode);
+        }
+
+        var followersJson = await followersResponse.Content.ReadAsStringAsync();
+        var followers = JsonSerializer.Deserialize<List<SocialProfileDto>>(followersJson);
+
+        List<BlogPostDto> ret = new();
+        var result = _blogPostService.GetAllNonDraft(0, 100);
+        foreach(var blog in result.Value.Results)
+        {
+            if(followers.Any(f=>f.userId==blog.UserId))
+                ret.Add(blog);
+        }
+        return CreateResponse(ret.ToResult());
     }
 
 

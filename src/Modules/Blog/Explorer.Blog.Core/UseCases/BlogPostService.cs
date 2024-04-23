@@ -221,24 +221,4 @@ public class BlogPostService : CrudService<BlogPostDto, BlogPost>, IBlogPostServ
         return MapToDto(topRatedPosts); ;
     }
 
-    public Result<PagedResult<BlogPostDto>> GetAllByFollowing(int page, int pageSize, int id)
-    {
-        try
-        {
-            var blogPosts = _blogPostsRepository.GetAllByFollowing(page, pageSize, id);
-            var blogPostDtos = MapToDto(blogPosts);
-            foreach (var blogPostDto in blogPostDtos.Value.Results)
-                blogPostDto.Username = GetUsername(blogPostDto.UserId);
-
-            return blogPostDtos;
-        }
-        catch (KeyNotFoundException e)
-        {
-            return Result.Fail(FailureCode.NotFound).WithError(e.Message);
-        }
-        catch (ArgumentException e)
-        {
-            return Result.Fail(FailureCode.InvalidArgument).WithError(e.Message);
-        }
-    }
 }

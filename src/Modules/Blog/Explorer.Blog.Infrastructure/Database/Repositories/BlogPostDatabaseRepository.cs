@@ -10,11 +10,8 @@ namespace Explorer.Blog.Infrastructure.Database.Repositories;
 
 public class BlogPostDatabaseRepository : CrudDatabaseRepository<BlogPost, BlogContext>, IBlogPostRepository
 {
-    private readonly HttpClient _httpClient;
-    public BlogPostDatabaseRepository(BlogContext blogContext, HttpClient httpClient) : base(blogContext)
-    {
-        _httpClient = httpClient ?? throw new ArgumentNullException(nameof(httpClient));
-    }
+    public BlogPostDatabaseRepository(BlogContext blogContext) : base(blogContext)
+    { }
 
     public PagedResult<BlogPost> GetAllNonDraft(int page, int pageSize)
     {
@@ -59,39 +56,6 @@ public class BlogPostDatabaseRepository : CrudDatabaseRepository<BlogPost, BlogC
         return DbContext.BlogPosts
             .Where(bp => bp.Status == BlogPostStatus.Published)
             .ToList();
-    }
-
-    public PagedResult<BlogPost> GetAllByFollowing(int page, int pageSize, long userId)
-    {
-        var followingUserIds = GetFollowerIds(userId).Result;
-        var publishedBlogPosts = GetAllPublished();
-
-        var blogsOfFollowers = publishedBlogPosts
-            .Where(post => followingUserIds.Contains((int)post.UserId))
-            .OrderByDescending(post => post.Ratings?.Sum(rating => rating.Rating == Rating.Upvote ? 1 : -1))
-            .ToList();
-
-        return new PagedResult<BlogPost>(blogsOfFollowers, blogsOfFollowers.Count);
-    }
-
-
-
-    private async Task<List<int>> GetFollowerIds(long userId)
-    {
-        var response = await _httpClient.GetAsync($"http://localhost:8082/profiles/following/{userId}");
-
-        if (response.IsSuccessStatusCode)
-        {
-            var json = await response.Content.ReadAsStringAsync();
-            var socialProfile = JsonSerializer.Deserialize<SocialProfileDto>(json);
-
-            if (socialProfile != null && socialProfile.Followed != null)
-            {
-                return socialProfile.Followed.Select(user => user.Id).ToList();
-            }
-        }
-
-        return new List<int>();
     }
 }
 

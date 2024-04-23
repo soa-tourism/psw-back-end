@@ -37,8 +37,8 @@ public class UserDatabaseRepository : IUserRepository
         _dbContext.Users.Add(user);
         _dbContext.SaveChanges();
 
-        _dbContext.SocialProfiles.Add(new SocialProfile(user.Id, ""));
-        _dbContext.SaveChanges();
+        //_dbContext.SocialProfiles.Add(new SocialProfile(user.Id, ""));
+        //_dbContext.SaveChanges();
         return user;
     }
 

@@ -1,8 +1,5 @@
 ﻿using Explorer.BuildingBlocks.Core.Domain;
 using System.ComponentModel.DataAnnotations.Schema;
-using Explorer.Tours.Core.Domain;
-using Explorer.Tours.Core.Domain.TourExecutions;
-using Explorer.Tours.Core.Domain.Tours;
 using System.Text.Json.Serialization;
 using Explorer.Encounters.Core.Domain.Converters;
 

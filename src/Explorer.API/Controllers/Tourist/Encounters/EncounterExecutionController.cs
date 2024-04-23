@@ -1,17 +1,10 @@
-﻿using Explorer.API.Services;
-using Explorer.BuildingBlocks.Core.UseCases;
+﻿using Explorer.BuildingBlocks.Core.UseCases;
 using Explorer.Encounters.API.Dtos;
-using Explorer.Encounters.API.Public;
-using Explorer.Encounters.Core.Domain.Encounters;
 using Explorer.Stakeholders.Infrastructure.Authentication;
 using FluentResults;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using static System.Net.Mime.MediaTypeNames;
 using System.Text.Json;
 using System.Text;
-using Explorer.Stakeholders.Core.Domain;
-using Azure;
 
 namespace Explorer.API.Controllers.Tourist.Encounters
 {

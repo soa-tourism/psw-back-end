@@ -1,5 +1,5 @@
-﻿using Explorer.BuildingBlocks.Core.UseCases;
-using Explorer.Tours.API.Dtos;
+﻿using Explorer.API.Dtos.Tours;
+using Explorer.BuildingBlocks.Core.UseCases;
 using FluentResults;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -16,11 +16,11 @@ namespace Explorer.API.Controllers.Author
         public TourRatingAuthorController(IHttpClientFactory httpClientFactory)
         {
             _httpClient = httpClientFactory.CreateClient();
-            _httpClient.BaseAddress = new Uri("http://host.docker.internal:8081/v1/tours/reviews");
+            _httpClient.BaseAddress = new Uri("http://host.docker.internal:8083/v1/tours/reviews");
         }
 
         [HttpGet]
-        public async Task<ActionResult<PagedResult<TourRatingDto>>> GetAllByAuthor([FromQuery] int page, [FromQuery] int pageSize, [FromQuery] int authorId)
+        public async Task<ActionResult<PagedResult<TourRatingDto>>> GetAllByAuthor([FromQuery] int page, [FromQuery] int pageSize, [FromQuery] long authorId)
         {
             using var response = await _httpClient.GetAsync(ConstructUrl($"author/{authorId}"));
             var result = await response.Content.ReadAsStringAsync();

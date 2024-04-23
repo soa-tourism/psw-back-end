@@ -1,8 +1,8 @@
-﻿namespace Explorer.Tours.API.Dtos
+﻿namespace Explorer.API.Dtos.Tours
 {
     public class CheckpointPreviewDto
     {
-        public long Id { get; set; }
+        public string? Id { get; set; }
         public double Longitude { get; set; }
         public double Latitude { get; set; }
         public string Name { get; set; }

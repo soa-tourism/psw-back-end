@@ -1,10 +1,8 @@
-﻿using Explorer.Blog.API.Dtos;
+﻿using Explorer.API.Dtos.Tours;
+using Explorer.Blog.API.Dtos;
 using Explorer.Blog.API.Public;
 using Explorer.BuildingBlocks.Core.UseCases;
 using Explorer.Stakeholders.API.Public;
-using Explorer.Stakeholders.Core.UseCases;
-using Explorer.Tours.API.Dtos;
-using Explorer.Tours.API.Public.Administration;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Explorer.API.Controllers
@@ -13,14 +11,12 @@ namespace Explorer.API.Controllers
     public class LandingPageController : BaseApiController
     {
         private readonly IBlogPostService _blogPostService;
-        private readonly ITourService _tourService;
         private readonly IApplicationGradeService _applicationGradeService;
 
 
-        public LandingPageController(IBlogPostService blogPostService, ITourService tourService, IApplicationGradeService applicationGradeService)
+        public LandingPageController(IBlogPostService blogPostService, IApplicationGradeService applicationGradeService)
         {
             _blogPostService = blogPostService;
-            _tourService = tourService;
             _applicationGradeService = applicationGradeService;
         }
 
@@ -28,21 +24,6 @@ namespace Explorer.API.Controllers
         public ActionResult<PagedResult<BlogPostDto>> GetTopRatedBlogPosts(int count)
         {
             var result = _blogPostService.GetTopRatedBlogPosts(count);
-            return CreateResponse(result);
-        }
-
-        [HttpGet("top-rated-tours/{count}")]
-        public ActionResult<PagedResult<TourDto>> GetTopRatedTours(int count)
-        {
-            var result = _tourService.GetTopRatedTours(count);
-            return CreateResponse(result);
-        }
-
-
-        [HttpGet("get-all-tours-preview")]
-        public ActionResult<PagedResult<TourPreviewDto>> GetAllToursPreview([FromQuery] int page, [FromQuery] int pageSize)
-        {
-            var result = _tourService.GetFilteredPublishedTours(page, pageSize);
             return CreateResponse(result);
         }
 

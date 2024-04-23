@@ -1,17 +1,10 @@
 ﻿using Explorer.API.Services;
-using Explorer.BuildingBlocks.Core.UseCases;
 using Explorer.Encounters.API.Dtos;
-using Explorer.Encounters.API.Public;
-using Explorer.Encounters.Core.Domain.Encounters;
-using Explorer.Stakeholders.Infrastructure.Authentication;
-using Explorer.Tours.API.Dtos;
-using Explorer.Tours.API.Public.Administration;
 using FluentResults;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Text;
 using System.Text.Json;
-using static System.Net.Mime.MediaTypeNames;
 
 namespace Explorer.API.Controllers.Author.Administration
 {
@@ -26,7 +19,7 @@ namespace Explorer.API.Controllers.Author.Administration
         private static readonly HttpClient client = new HttpClient();
         private string baseUrl = $"http://host.docker.internal:8090/encounter";
 
-        public EncounterController(IEncounterService encounterService)
+        public EncounterController()
         {
             _imageService = new ImageService();
 

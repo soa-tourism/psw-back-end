@@ -5,18 +5,17 @@ namespace Explorer.Stakeholders.Core.Domain
     public class SocialProfile : Entity
     {
         public long UserId { get; private set; }
+        public string Username { get; private set; }
         public List<User> Followers { get; private set; } = new List<User>();
         public List<User> Followed { get; private set; } = new List<User>();
-        public List<User> Followable { get; private set; } = new List<User>();
 
         public SocialProfile() { }
-
-        public SocialProfile(long userId)
+        public SocialProfile(long userId, string username)
         {
             UserId = userId;
+            Username = username;
             Followers = new List<User>();
             Followed = new List<User>();
-            Followable = new List<User>();
         }
 
         public void Follow(User user)
@@ -37,11 +36,6 @@ namespace Explorer.Stakeholders.Core.Domain
         public void SetFollowers(List<User> followers)
         {
             Followers = followers;
-        }
-
-        public void SetFollowable(List<User> followable)
-        {
-            Followable = followable;
         }
     }
 }

@@ -21,7 +21,7 @@ namespace Explorer.Stakeholders.Infrastructure.Database.Repositories
 
             if (profile == null) throw new KeyNotFoundException("Social profile not found.");
             profile.SetFollowers(GetFollowers(profile));
-            profile.SetFollowable(GetFollowable(profile));
+            //profile.SetFollowable(GetFollowable(profile));
 
             return profile;
         }
@@ -44,7 +44,7 @@ namespace Explorer.Stakeholders.Infrastructure.Database.Repositories
                 _dbContext.SaveChanges();
             }
             profile.SetFollowers(GetFollowers(profile));
-            profile.SetFollowable(GetFollowable(profile));
+            //profile.SetFollowable(GetFollowable(profile));
 
             return profile;
         }

@@ -18,15 +18,15 @@ namespace Explorer.API.Controllers.Tourist
         public TourRatingTouristController(IHttpClientFactory httpClientFactory)
         {
             _httpClient = httpClientFactory.CreateClient();
-            _httpClient.BaseAddress = new Uri("http://host.docker.internal:8081/v1/tours/reviews");
+            _httpClient.BaseAddress = new Uri("http://host.docker.internal:8083/v1/tours/reviews");
         }
 
         [HttpGet]
-        public async Task<ActionResult<PagedResult<TourRatingDto>>> GetAllReviews([FromQuery] int page, [FromQuery] int pageSize, [FromQuery] long id, [FromQuery] string type)
+        public async Task<ActionResult<PagedResult<TourRatingDto>>> GetAllReviews([FromQuery] int page, [FromQuery] int pageSize, [FromQuery] string id, [FromQuery] string type)
         {
             var endpoint = type.ToLower() switch
             {
-                "tourist" => $"tourist/{id}",
+                "tourist" => $"tourist/{long.Parse(id)}",
                 "tour" => $"tour/{id}",
                 _ => throw new ArgumentException("Invalid type. Type must be 'tourist' or 'tour'.")
             };
@@ -65,8 +65,8 @@ namespace Explorer.API.Controllers.Tourist
             return CreateResponse(result.ToResult());
         }
 
-        [HttpPut("{id:long}")]
-        public async Task<ActionResult<TourRatingDto>> Update(long id, [FromForm] TourRatingDto tourRating, [FromForm] List<IFormFile>? images = null)
+        [HttpPut("{id}")]
+        public async Task<ActionResult<TourRatingDto>> Update(string id, [FromForm] TourRatingDto tourRating, [FromForm] List<IFormFile>? images = null)
         {
             tourRating.Images = await ConvertToByteList(images);
 

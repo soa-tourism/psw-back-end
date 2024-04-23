@@ -18,7 +18,7 @@ namespace Explorer.API.Controllers.Author.Administration
         public CheckpointController(IHttpClientFactory httpClientFactory)
         {
             _httpClient = httpClientFactory.CreateClient();
-            _httpClient.BaseAddress = new Uri("http://host.docker.internal:8081/v1/checkpoint");
+            _httpClient.BaseAddress = new Uri("http://host.docker.internal:8083/v1/checkpoint");
             _imageService = new ImageService();
         }
 
@@ -46,11 +46,11 @@ namespace Explorer.API.Controllers.Author.Administration
             return Ok(pagedResult);
         }
 
-        [HttpGet("details/{id:long}")]
+        [HttpGet("details/{id}")]
         [Authorize(Policy = "authorPolicy")]
-        public async Task<ActionResult<CheckpointDto>> GetById(long id)
+        public async Task<ActionResult<CheckpointDto>> GetById(string id)
         {
-            using var response = await _httpClient.GetAsync(ConstructUrl("details/"+id.ToString()));
+            using var response = await _httpClient.GetAsync(ConstructUrl("details/"+id));
             var result = await response.Content.ReadAsStringAsync();
 
             if (!response.IsSuccessStatusCode)
@@ -82,9 +82,9 @@ namespace Explorer.API.Controllers.Author.Administration
             return CreateResponse(result.ToResult());
         }
 
-        [HttpPut("{id:long}")]
+        [HttpPut("{id}")]
         [Authorize(Policy = "authorPolicy")]
-        public async Task<ActionResult<CheckpointDto>> Update([FromForm] CheckpointDto checkpoint, long id, [FromForm] List<IFormFile>? pictures = null)
+        public async Task<ActionResult<CheckpointDto>> Update([FromForm] CheckpointDto checkpoint, string id, [FromForm] List<IFormFile>? pictures = null)
         {
             if (pictures != null && pictures.Any())
             {
@@ -93,7 +93,7 @@ namespace Explorer.API.Controllers.Author.Administration
             }
 
             using var jsonContent = new StringContent(JsonSerializer.Serialize(checkpoint), Encoding.UTF8, "application/json");
-            using var response = await _httpClient.PutAsync(ConstructUrl(id.ToString()), jsonContent);
+            using var response = await _httpClient.PutAsync(ConstructUrl(id), jsonContent);
 
             var responseContent = await response.Content.ReadAsStringAsync();
             var result = JsonSerializer.Deserialize<CheckpointDto>(responseContent);
@@ -101,11 +101,11 @@ namespace Explorer.API.Controllers.Author.Administration
             return CreateResponse(result.ToResult());
         }
 
-        [HttpDelete("{id:long}")]
+        [HttpDelete("{id}")]
         [Authorize(Policy = "authorPolicy")]
-        public async Task<ActionResult> Delete(long id)
+        public async Task<ActionResult> Delete(string id)
         {
-            using var response = await _httpClient.DeleteAsync(ConstructUrl(id.ToString()));
+            using var response = await _httpClient.DeleteAsync(ConstructUrl(id));
 
             if (response.IsSuccessStatusCode) return NoContent();
 
@@ -113,11 +113,11 @@ namespace Explorer.API.Controllers.Author.Administration
             return CreateResponse(errorResult);
         }
 
-        [HttpGet("{id:long}")]
+        [HttpGet("{id}")]
         [Authorize(Policy = "authorPolicy")]
-        public async Task<ActionResult<List<CheckpointDto>>> GetAllByTour([FromQuery] int page, [FromQuery] int pageSize, long id)
+        public async Task<ActionResult<List<CheckpointDto>>> GetAllByTour([FromQuery] int page, [FromQuery] int pageSize, string id)
         {
-            var requestUri = ConstructUrl(id.ToString());
+            var requestUri = ConstructUrl(id);
 
             using var response = await _httpClient.GetAsync(requestUri);
             var result = await response.Content.ReadAsStringAsync();

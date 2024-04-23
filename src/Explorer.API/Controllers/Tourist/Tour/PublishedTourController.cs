@@ -16,7 +16,7 @@ namespace Explorer.API.Controllers.Tourist.Tour
         public PublishedTourController(IHttpClientFactory httpClientFactory)
         {
             _httpClient = httpClientFactory.CreateClient();
-            _httpClient.BaseAddress = new Uri("http://localhost:8081/v1/tours");
+            _httpClient.BaseAddress = new Uri("http://localhost:8083/v1/tours");
         }
 
         [HttpGet]

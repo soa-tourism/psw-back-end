@@ -1,10 +1,10 @@
 ﻿using Explorer.BuildingBlocks.Core.UseCases;
-using Explorer.Tours.API.Dtos;
 using FluentResults;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Text.Json;
 using System.Text;
+using Explorer.API.Dtos.Tours;
 
 namespace Explorer.API.Controllers.Administrator.Administration
 {
@@ -17,7 +17,7 @@ namespace Explorer.API.Controllers.Administrator.Administration
         public EquipmentController(IHttpClientFactory httpClientFactory)
         {
             _httpClient = httpClientFactory.CreateClient();
-            _httpClient.BaseAddress = new Uri("http://host.docker.internal:8081/v1/tours/equipment");
+            _httpClient.BaseAddress = new Uri("http://host.docker.internal:8083/v1/tours/equipment");
         }
 
         [HttpGet]
@@ -44,10 +44,10 @@ namespace Explorer.API.Controllers.Administrator.Administration
             return Ok(pagedResult);
         }
 
-        [HttpGet("{id:long}")]
-        public async Task<ActionResult<EquipmentDto>> GetById(long id)
+        [HttpGet("{id}")]
+        public async Task<ActionResult<EquipmentDto>> GetById(string id)
         {
-            using var response = await _httpClient.GetAsync(ConstructUrl(id.ToString()));
+            using var response = await _httpClient.GetAsync(ConstructUrl(id));
             var result = await response.Content.ReadAsStringAsync();
 
             if (!response.IsSuccessStatusCode)
@@ -72,11 +72,11 @@ namespace Explorer.API.Controllers.Administrator.Administration
             return CreateResponse(result.ToResult());
         }
         
-        [HttpPut("{id:long}")]
-        public async Task<ActionResult<EquipmentDto>> Update([FromBody] EquipmentDto equipment, long id)
+        [HttpPut("{id}")]
+        public async Task<ActionResult<EquipmentDto>> Update([FromBody] EquipmentDto equipment, string id)
         {
             using var jsonContent = new StringContent(JsonSerializer.Serialize(equipment), Encoding.UTF8, "application/json");
-            using var response = await _httpClient.PutAsync(ConstructUrl(id.ToString()), jsonContent);
+            using var response = await _httpClient.PutAsync(ConstructUrl(id), jsonContent);
 
             var responseContent = await response.Content.ReadAsStringAsync();
             var result = JsonSerializer.Deserialize<EquipmentDto>(responseContent);
@@ -84,10 +84,10 @@ namespace Explorer.API.Controllers.Administrator.Administration
             return CreateResponse(result.ToResult());
         }
 
-        [HttpDelete("{id:long}")]
-        public async Task<ActionResult> Delete(long id)
+        [HttpDelete("{id}")]
+        public async Task<ActionResult> Delete(string id)
         {
-            using var response = await _httpClient.DeleteAsync(ConstructUrl(id.ToString()));
+            using var response = await _httpClient.DeleteAsync(ConstructUrl(id));
 
             if (response.IsSuccessStatusCode) return NoContent();
 

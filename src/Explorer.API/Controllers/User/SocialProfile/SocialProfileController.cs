@@ -186,6 +186,34 @@ namespace Explorer.API.Controllers.User.SocialProfile
             return Ok();
         }
 
+        [HttpGet("search/{username}")]
+        public async Task<ActionResult<SocialProfileDto>> SearchSocialProfilesByUsername(string username)
+        {
+            using var response = await _httpClient.GetAsync(ConstructUrl("profiles/search/" + username));
+            var result = await response.Content.ReadAsStringAsync();
+
+            if (!response.IsSuccessStatusCode)
+            {
+                var errorResult = Result.Fail($"Failed to get social profiles: {result}");
+                return CreateResponse(errorResult);
+            }
+
+            try
+            {
+                if (string.IsNullOrEmpty(result))
+                {   // Return an empty list if there are no profiles with searched username
+                    return Ok(new List<SocialProfileDto>());
+                }
+
+                var profiles = JsonSerializer.Deserialize<List<SocialProfileDto>>(result); // Deserialization
+                return Ok(profiles);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError); // Log or handle the exception
+            }
+        }
+
         private string ConstructUrl(string relativePath)
         {
             return $"{_httpClient.BaseAddress}/{relativePath}";

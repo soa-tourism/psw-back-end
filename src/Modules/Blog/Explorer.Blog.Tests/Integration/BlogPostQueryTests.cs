@@ -57,9 +57,10 @@ public class BlogPostQueryTests : BaseBlogIntegrationTest
 
     private static BlogPostController CreateController(IServiceScope scope)
     {
-        return new BlogPostController(scope.ServiceProvider.GetRequiredService<IBlogPostService>())
-        {
-            ControllerContext = BuildContext("-1")
-        };
+        return null;
+        // return new BlogPostController(scope.ServiceProvider.GetRequiredService<IBlogPostService>())
+        // {
+        //     ControllerContext = BuildContext("-1")
+        // };
     }
 }

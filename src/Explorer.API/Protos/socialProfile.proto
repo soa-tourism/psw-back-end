@@ -1,0 +1,74 @@
+
+syntax = "proto3";
+
+option csharp_namespace = "GrpcServiceTranscoding";
+import "Protos/google/api/annotations.proto";
+import "google/protobuf/timestamp.proto";
+
+service SocialProfile {
+  rpc GetSocialProfile (UserId) returns (SocialProfileResponse) {
+    option (google.api.http) = {
+      get: "/api/social-profile/get/{userId}"
+    };
+  }
+  rpc GetFollowers (UserId) returns (SocialProfilesResponse) {
+    option (google.api.http) = {
+      get: "/api/social-profile/get-followers/{userId}"
+    };
+  }
+  rpc GetFollowing (UserId) returns (SocialProfilesResponse) {
+    option (google.api.http) = {
+      get: "/api/social-profile/get-following/{userId}"
+    };
+  }
+  rpc GetRecommended (UserId) returns (SocialProfilesResponse) {
+    option (google.api.http) = {
+      get: "/api/social-profile/get-recommended/{userId}"
+    };
+  }
+  rpc Follow (FollowRequest) returns (SocialProfilesResponse) {
+    option (google.api.http) = {
+      put: "/api/social-profile/follow/{userId}/{followerId}"
+      body: "*"
+    };
+  }
+  rpc Unfollow (UnfollowRequest) returns (SocialProfilesResponse) {
+    option (google.api.http) = {
+      delete: "/api/social-profile/unfollow/{followedId}/{userId}"
+    };
+  }
+  rpc Search (Username) returns (SocialProfilesResponse) {
+    option (google.api.http) = {
+      get: "/api/social-profile/search/{username}"
+    };
+  }
+  rpc CreateSocialProfile (SocialProfileRequest) returns (SocialProfileResponse){}
+}
+
+message FollowRequest{
+    int64 userId = 1;
+    int64 followerId = 2;
+}
+message UnfollowRequest{
+    int64 followedId = 1;
+    int64 userId = 2;
+}
+message Username{
+    string username = 1;
+}
+message UserId{
+    int64 userId = 1;
+}
+message SocialProfilesResponse{
+    repeated SocialProfileResponse socialProfiles = 1;
+}
+message SocialProfileRequest{
+    int64 userId = 1;
+    string username = 2;
+}
+message SocialProfileResponse{
+    int64 userId = 1;
+    string username = 2;
+    repeated SocialProfileResponse followers = 3;
+    repeated SocialProfileResponse following = 4;
+}

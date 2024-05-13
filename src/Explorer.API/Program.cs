@@ -1,3 +1,4 @@
+using Explorer.API.ProtoControllers;
 using Explorer.API.Startup;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -9,6 +10,8 @@ builder.Services.ConfigureCors(corsPolicy);
 builder.Services.ConfigureAuth();
 
 builder.Services.RegisterModules();
+builder.Services.AddGrpc().AddJsonTranscoding();
+
 
 var app = builder.Build();
 
@@ -23,7 +26,6 @@ else
     app.UseExceptionHandler("/error");
     app.UseHsts();
 }
-
 app.UseRouting();
 app.UseCors(corsPolicy);
 app.UseHttpsRedirection();
@@ -32,6 +34,7 @@ app.UseAuthorization();
 
 app.UseStaticFiles();
 app.MapControllers();
+app.MapGrpcService<SocialProfileProtoController>();
 
 app.Run();
 

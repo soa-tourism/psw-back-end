@@ -2,9 +2,10 @@
 using Explorer.Blog.Core.Domain.BlogPosts;
 using Explorer.Stakeholders.API.Dtos;
 using Explorer.Stakeholders.API.Public;
-using Explorer.Stakeholders.Core.Domain;
 using Explorer.Stakeholders.Infrastructure.Authentication;
 using FluentResults;
+using Grpc.Net.Client;
+using GrpcServiceTranscoding;
 using Microsoft.AspNetCore.Mvc;
 using System.Net.Http;
 using static System.Net.Mime.MediaTypeNames;
@@ -43,12 +44,22 @@ public class AuthenticationController : BaseApiController
         var username = result.Value.Username;
         var userId = _userService.GetUserByUsername(username).Value.Id;
 
-        using var response = await _httpClient.PutAsync(ConstructUrl("profiles/add/" + userId.ToString() + "/" + username), new StringContent(""));
-        var result2 = await response.Content.ReadAsStringAsync();
+        var httpHandler = new HttpClientHandler();
+        httpHandler.ServerCertificateCustomValidationCallback = HttpClientHandler.DangerousAcceptAnyServerCertificateValidator;
+        var channel = GrpcChannel.ForAddress("http://host.docker.internal:8082", new GrpcChannelOptions { HttpHandler = httpHandler });
 
-        if (!response.IsSuccessStatusCode)
+        var client = new SocialProfile.SocialProfileClient(channel);
+        var request = new SocialProfileRequest
         {
-            var errorResult = Result.Fail($"Failed to follow social profile: {result}");
+            UserId = userId,
+            Username = username,
+        };
+        var response = client.CreateSocialProfile(request);
+
+
+        if (await Task.FromResult(response)==null)
+        {
+            var errorResult = Result.Fail($"Failed to create social profile: {result}");
             return CreateResponse(errorResult);
         }
         return Ok();

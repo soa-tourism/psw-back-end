@@ -44,21 +44,21 @@ namespace Explorer.API.Controllers.Administrator.Administration
             return Ok(pagedResult);
         }
 
-        [HttpGet("{id}")]
-        public async Task<ActionResult<EquipmentDto>> GetById(string id)
-        {
-            using var response = await _httpClient.GetAsync(ConstructUrl(id));
-            var result = await response.Content.ReadAsStringAsync();
+        //[HttpGet("{id}")]
+        //public async Task<ActionResult<EquipmentDto>> GetById(string id)
+        //{
+        //    using var response = await _httpClient.GetAsync(ConstructUrl(id));
+        //    var result = await response.Content.ReadAsStringAsync();
 
-            if (!response.IsSuccessStatusCode)
-            {
-                var errorResult = Result.Fail($"Failed to get equipment: {result}");
-                return CreateResponse(errorResult);
-            }
+        //    if (!response.IsSuccessStatusCode)
+        //    {
+        //        var errorResult = Result.Fail($"Failed to get equipment: {result}");
+        //        return CreateResponse(errorResult);
+        //    }
 
-            var equipment = JsonSerializer.Deserialize<EquipmentDto>(result);
-            return Ok(equipment);
-        }
+        //    var equipment = JsonSerializer.Deserialize<EquipmentDto>(result);
+        //    return Ok(equipment);
+        //}
 
         [HttpPost]
         public async Task<ActionResult<EquipmentDto>> Create([FromBody] EquipmentDto equipment)
@@ -84,16 +84,16 @@ namespace Explorer.API.Controllers.Administrator.Administration
             return CreateResponse(result.ToResult());
         }
 
-        [HttpDelete("{id}")]
-        public async Task<ActionResult> Delete(string id)
-        {
-            using var response = await _httpClient.DeleteAsync(ConstructUrl(id));
+        //[HttpDelete("{id}")]
+        //public async Task<ActionResult> Delete(string id)
+        //{
+        //    using var response = await _httpClient.DeleteAsync(ConstructUrl(id));
 
-            if (response.IsSuccessStatusCode) return NoContent();
+        //    if (response.IsSuccessStatusCode) return NoContent();
 
-            var errorResult = Result.Fail("Failed to delete equipment.");
-            return CreateResponse(errorResult);
-        }
+        //    var errorResult = Result.Fail("Failed to delete equipment.");
+        //    return CreateResponse(errorResult);
+        //}
 
         private string ConstructUrl(string relativePath)
         {

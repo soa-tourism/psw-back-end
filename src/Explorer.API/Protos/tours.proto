@@ -6,25 +6,22 @@ import "Protos/google/api/annotations.proto";
 import "google/protobuf/timestamp.proto";
 
 service Tour {
-	// EquipmentController
-	/*
+	// Equipment
 	rpc GetAvailableEquipment (EquipmentIds) returns (EquipmentsResponse) {
 		option (google.api.http) = {
 			get: "/api/tours/{id}/equipment/available"
 		};
 	}
-	rpc GetAllEquipment (Page) returns (EquipmentsResponse) {
+	rpc GetAllEquipment (Page) returns (PagedEquipmentsResponse) {
 		option (google.api.http) = {
 			get: "/api/administration/equipment"
 		};
 	}
-	*/
 	rpc GetEquipment (EquipmentId) returns (EquipmentResponse) {
 		option (google.api.http) = {
 			get: "/api/administration/equipment/{id}"
 		};
 	}
-	/*
 	rpc CreateEquipment (EquipmentResponse) returns (EquipmentResponse) {
 		option (google.api.http) = {
 			post: "/api/administration/equipment"
@@ -42,17 +39,17 @@ service Tour {
 			delete: "/api/administration/equipment/{id}"
 		};
 	}
-	*/
-	// TourController
-	// PublishedTourController
+	
+	// Tour
+	// PublishedTour
 }
 message EquipmentIds{
 	string id = 1;
 	repeated string equipmentIds = 2;
 }
 message Page{
-	int64 page = 1;
-	int64 pageSize = 2;
+	int32 page = 1;
+	int32 pageSize = 2;
 }
 message EquipmentId{
 	string id = 1;
@@ -68,4 +65,8 @@ message EquipmentResponse{
 }
 message EquipmentsResponse{
 	repeated EquipmentResponse EquipmentResponse = 1;
+}
+message PagedEquipmentsResponse{
+	repeated EquipmentResponse Results = 1;
+	int32 TotalCounts = 2;
 }

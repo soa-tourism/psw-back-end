@@ -17,22 +17,22 @@ namespace Explorer.API.Controllers.Author.Administration
             _httpClient.BaseAddress = new Uri("http://host.docker.internal:8083/v1/tours");
         }
 
-        [HttpGet("{id}/equipment/available")]
-        public async Task<ActionResult<List<EquipmentDto>>> GetAvailableEquipment(string id, [FromQuery] List<string>? equipmentIds)
-        {
-            var requestUri = ConstructUrl($"{id}/equipment/available", equipmentIds);
+        //[HttpGet("{id}/equipment/available")]
+        //public async Task<ActionResult<List<EquipmentDto>>> GetAvailableEquipment(string id, [FromQuery] List<string>? equipmentIds)
+        //{
+        //    var requestUri = ConstructUrl($"{id}/equipment/available", equipmentIds);
 
-            using var response = await _httpClient.GetAsync(requestUri);
-            var result = await response.Content.ReadAsStringAsync();
+        //    using var response = await _httpClient.GetAsync(requestUri);
+        //    var result = await response.Content.ReadAsStringAsync();
 
-            if (!response.IsSuccessStatusCode)
-            {
-                return BadRequest($"Failed to get equipment: {result}");
-            }
+        //    if (!response.IsSuccessStatusCode)
+        //    {
+        //        return BadRequest($"Failed to get equipment: {result}");
+        //    }
 
-            var equipment = JsonSerializer.Deserialize<List<EquipmentDto>>(result);
-            return Ok(equipment);
-        }
+        //    var equipment = JsonSerializer.Deserialize<List<EquipmentDto>>(result);
+        //    return Ok(equipment);
+        //}
 
         private string ConstructUrl(string relativePath, List<string>? equipmentIds)
         {

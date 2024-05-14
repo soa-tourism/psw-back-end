@@ -20,29 +20,29 @@ namespace Explorer.API.Controllers.Administrator.Administration
             _httpClient.BaseAddress = new Uri("http://host.docker.internal:8083/v1/tours/equipment");
         }
 
-        [HttpGet]
-        public async Task<ActionResult<PagedResult<EquipmentDto>>> GetAll([FromQuery] int page, [FromQuery] int pageSize)
-        {
-            using var response = await _httpClient.GetAsync("");
-            var result = await response.Content.ReadAsStringAsync();
+        //[HttpGet]
+        //public async Task<ActionResult<PagedResult<EquipmentDto>>> GetAll([FromQuery] int page, [FromQuery] int pageSize)
+        //{
+        //    using var response = await _httpClient.GetAsync("");
+        //    var result = await response.Content.ReadAsStringAsync();
 
-            if (!response.IsSuccessStatusCode)
-            {
-                var error = Result.Fail($"Failed to get equipment: {result}");
-                return CreateResponse(error);
-            }
+        //    if (!response.IsSuccessStatusCode)
+        //    {
+        //        var error = Result.Fail($"Failed to get equipment: {result}");
+        //        return CreateResponse(error);
+        //    }
 
-            var equipment = JsonSerializer.Deserialize<List<EquipmentDto>>(result);
-            if (equipment is  null)
-            {
-                var noEquipment = Result.Ok("No equipment found.");
-                return CreateResponse(noEquipment);
+        //    var equipment = JsonSerializer.Deserialize<List<EquipmentDto>>(result);
+        //    if (equipment is null)
+        //    {
+        //        var noEquipment = Result.Ok("No equipment found.");
+        //        return CreateResponse(noEquipment);
 
-            }
+        //    }
 
-            var pagedResult = PaginateResult(page, pageSize, equipment);
-            return Ok(pagedResult);
-        }
+        //    var pagedResult = PaginateResult(page, pageSize, equipment);
+        //    return Ok(pagedResult);
+        //}
 
         //[HttpGet("{id}")]
         //public async Task<ActionResult<EquipmentDto>> GetById(string id)
@@ -60,29 +60,29 @@ namespace Explorer.API.Controllers.Administrator.Administration
         //    return Ok(equipment);
         //}
 
-        [HttpPost]
-        public async Task<ActionResult<EquipmentDto>> Create([FromBody] EquipmentDto equipment)
-        {
-            using var jsonContent = new StringContent(JsonSerializer.Serialize(equipment), Encoding.UTF8, "application/json");
-            using var response = await _httpClient.PostAsync("", jsonContent);
+        //[HttpPost]
+        //public async Task<ActionResult<EquipmentDto>> Create([FromBody] EquipmentDto equipment)
+        //{
+        //    using var jsonContent = new StringContent(JsonSerializer.Serialize(equipment), Encoding.UTF8, "application/json");
+        //    using var response = await _httpClient.PostAsync("", jsonContent);
 
-            var responseContent = await response.Content.ReadAsStringAsync();
-            var result = JsonSerializer.Deserialize<EquipmentDto>(responseContent);
+        //    var responseContent = await response.Content.ReadAsStringAsync();
+        //    var result = JsonSerializer.Deserialize<EquipmentDto>(responseContent);
 
-            return CreateResponse(result.ToResult());
-        }
+        //    return CreateResponse(result.ToResult());
+        //}
         
-        [HttpPut("{id}")]
-        public async Task<ActionResult<EquipmentDto>> Update([FromBody] EquipmentDto equipment, string id)
-        {
-            using var jsonContent = new StringContent(JsonSerializer.Serialize(equipment), Encoding.UTF8, "application/json");
-            using var response = await _httpClient.PutAsync(ConstructUrl(id), jsonContent);
+        //[HttpPut("{id}")]
+        //public async Task<ActionResult<EquipmentDto>> Update([FromBody] EquipmentDto equipment, string id)
+        //{
+        //    using var jsonContent = new StringContent(JsonSerializer.Serialize(equipment), Encoding.UTF8, "application/json");
+        //    using var response = await _httpClient.PutAsync(ConstructUrl(id), jsonContent);
 
-            var responseContent = await response.Content.ReadAsStringAsync();
-            var result = JsonSerializer.Deserialize<EquipmentDto>(responseContent);
+        //    var responseContent = await response.Content.ReadAsStringAsync();
+        //    var result = JsonSerializer.Deserialize<EquipmentDto>(responseContent);
 
-            return CreateResponse(result.ToResult());
-        }
+        //    return CreateResponse(result.ToResult());
+        //}
 
         //[HttpDelete("{id}")]
         //public async Task<ActionResult> Delete(string id)

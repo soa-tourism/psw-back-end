@@ -75,7 +75,7 @@ namespace Explorer.API.ProtoControllers
 
             return await Task.FromResult(response);
         }
-        public override async Task<EquipmentResponse> DeleteEquipment(Id id,
+        public override async Task<blank> DeleteEquipment(Id id,
             ServerCallContext context)
         {
             var httpHandler = new HttpClientHandler();

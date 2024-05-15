@@ -67,7 +67,7 @@ service Tour {
 			body: "*"
 		};
 	}
-	rpc DeleteEquipment (Id) returns (EquipmentResponse) {
+	rpc DeleteEquipment (Id) returns (blank) {
 		option (google.api.http) = {
 			delete: "/api/administration/equipment/{id}"
 		};
@@ -174,7 +174,7 @@ message UpdateEquipmentId{
 }
 message PagedEquipmentsResponse{
 	repeated EquipmentResponse results = 1;
-	int32 totalCounts = 2;
+	int32 totalCount = 2;
 }
 
 // Tour

@@ -109,9 +109,9 @@ message EquipmentIds{
 	repeated string equipmentIds = 2;
 }
 message EquipmentResponse{
-	optional string id = 1;
+	string id = 1;
 	string name = 2;
-	optional string description = 3;
+	string description = 3;
 }
 message EquipmentsResponse{
 	repeated EquipmentResponse EquipmentResponse = 1;
@@ -127,11 +127,11 @@ message PagedEquipmentsResponse{
 
 // Tour
 message TourResponse{
-	optional string id = 1;
+	string id = 1;
 	int64 authorId = 2;
 	string name = 3;
-    optional string description = 4;
-    optional string difficulty = 5;
+    string description = 4;
+    string difficulty = 5;
 	string status = 6;
 	double price = 7;
     repeated string tags = 8;
@@ -167,13 +167,13 @@ message TourEquipment{
 
 // Checkpoint
 message CheckpointResponse{
-	optional string id = 1;
-	optional string tourId = 2;
+	string id = 1;
+	string tourId = 2;
 	int64 authorId = 3;
 	double longitude = 4;
 	double latitude = 5;
 	string name = 6;
-	optional string description = 7;
+	string description = 7;
 	repeated string pictures = 8;
 	double requiredTimeInSeconds = 9;
 	//TODO checkpointSecret 

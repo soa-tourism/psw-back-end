@@ -17,7 +17,7 @@ service Tour {
 			get: "/api/administration/equipment"
 		};
 	}
-	rpc GetEquipment (EquipmentId) returns (EquipmentResponse) {
+	rpc GetEquipment (Id) returns (EquipmentResponse) {
 		option (google.api.http) = {
 			get: "/api/administration/equipment/{id}"
 		};
@@ -30,33 +30,83 @@ service Tour {
 	}
 	rpc UpdateEquipment (UpdateEquipmentId) returns (EquipmentResponse) {
 		option (google.api.http) = {
-			put: "/api/administration/equipment{id}"
+			put: "/api/administration/equipment/{id}"
 			body: "*"
 		};
 	}
-	rpc DeleteEquipment (EquipmentId) returns (EquipmentResponse) {
+	rpc DeleteEquipment (Id) returns (EquipmentResponse) {
 		option (google.api.http) = {
 			delete: "/api/administration/equipment/{id}"
 		};
 	}
 	
 	// Tour
+    rpc GetAllTour (Page) returns (PagedToursResponse) {
+		option (google.api.http) = {
+			get: "/api/administration/tours"
+		};
+	}
+    rpc GetTour (Id) returns (TourResponse) {
+		option (google.api.http) = {
+			get: "/api/administration/tours/{id}"
+		};
+	}
+	rpc CreateTour (TourResponse) returns (TourResponse) {
+		option (google.api.http) = {
+			post: "/api/administration/tours"
+			body: "*"
+		};
+	}
+    rpc UpdateTour (UpdateTourId) returns (TourResponse) {
+		option (google.api.http) = {
+			post: "/api/administration/tours/{id}"
+			body: "*"
+		};
+	}
+    rpc DeleteTour (Id) returns (blank) {
+		option (google.api.http) = {
+			delete: "/api/administration/tours/{id}"
+		};
+	}
+    rpc GetTourByAuthorId (TourByAuthorId) returns (ToursResponse) {
+		option (google.api.http) = {
+			get: "/api/administration/tours/author/{id}"
+		};
+	}
+	rpc AddTourEquipment (TourEquipment) returns (blank) {
+		option (google.api.http) = {
+			post: "/api/administration/tours/{id}/equipment/{equipmentId}"
+			body: "*"
+		};
+	}
+	rpc DeleteTourEquipment (TourEquipment) returns (blank) {
+		option (google.api.http) = {
+			delete: "/api/administration/tours/{id}/equipment/{equipmentId}"
+		};
+	}
+
+
 	// PublishedTour
+	// TourReview
+	// PublicCheckpoint
+    // Checkpoint
+	// TouristPosition
+	// TourExecution
 }
-message EquipmentIds{
-	string id = 1;
-	repeated string equipmentIds = 2;
-}
+
+message blank{}
 message Page{
 	int32 page = 1;
 	int32 pageSize = 2;
 }
-message EquipmentId{
+message Id{
 	string id = 1;
 }
-message UpdateEquipmentId{
-	EquipmentResponse equipment = 1;
-	string id = 2;
+
+// Equipment
+message EquipmentIds{
+	string id = 1;
+	repeated string equipmentIds = 2;
 }
 message EquipmentResponse{
 	optional string id = 1;
@@ -66,7 +116,71 @@ message EquipmentResponse{
 message EquipmentsResponse{
 	repeated EquipmentResponse EquipmentResponse = 1;
 }
-message PagedEquipmentsResponse{
-	repeated EquipmentResponse Results = 1;
-	int32 TotalCounts = 2;
+message UpdateEquipmentId{
+	EquipmentResponse equipment = 1;
+	string id = 2;
 }
+message PagedEquipmentsResponse{
+	repeated EquipmentResponse results = 1;
+	int32 totalCounts = 2;
+}
+
+// Tour
+message TourResponse{
+	optional string id = 1;
+	int64 authorId = 2;
+	string name = 3;
+    optional string description = 4;
+    optional string difficulty = 5;
+	string status = 6;
+	double price = 7;
+    repeated string tags = 8;
+    repeated EquipmentResponse equipment = 9;
+    repeated CheckpointResponse checkpoints = 10;
+}
+message ToursResponse{
+	repeated TourResponse tours = 1;
+}
+message PagedToursResponse{
+	repeated TourResponse results = 1;
+	int32 totalCounts = 2;
+}
+message UpdateTourId{
+	TourResponse tour = 1;
+	string id = 2;
+}
+message TourByAuthorId{
+	int32 page = 1;
+	int32 pageSize = 2;
+	int64 id = 3;
+}
+message TourEquipment{
+	string id = 1;
+	string equipmentId = 2;
+}
+
+// PublishedTour
+
+// TourReview
+
+// PublicCheckpoint
+
+// Checkpoint
+message CheckpointResponse{
+	optional string id = 1;
+	optional string tourId = 2;
+	int64 authorId = 3;
+	double longitude = 4;
+	double latitude = 5;
+	string name = 6;
+	optional string description = 7;
+	repeated string pictures = 8;
+	double requiredTimeInSeconds = 9;
+	//TODO checkpointSecret 
+	int64 encounterId = 10;
+	bool isSecretPrerequisite = 11;
+}
+
+// TouristPosition
+
+// TourExecution

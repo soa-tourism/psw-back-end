@@ -6,6 +6,39 @@ import "Protos/google/api/annotations.proto";
 import "google/protobuf/timestamp.proto";
 
 service Tour {
+	//Checkpoints
+	rpc GetAllCheckpoints(Page) returns (PagedCheckpoints){
+		option (google.api.http) = {
+			get: "/api/administration/checkpoint"
+		};
+	}
+	rpc GetAllCheckpointsByTour(PageWithId) returns (CheckpointsResponse){
+		option (google.api.http) = {
+			get: "/api/administration/checkpoint/{id}"
+		};
+	}
+	rpc GetCheckpointById(Id) returns (CheckpointResponse){
+		option (google.api.http) = {
+			get: "/api/administration/checkpoint/details/{id}"
+		};
+	}
+	rpc CreateCheckpoint(CreateCheckpointRequest) returns (CheckpointResponse){
+		option (google.api.http)={
+			post: "/api/administration/checkpoint/create/{status}"
+			body:"*"
+		};
+	}
+	rpc UpdateCheckpoint(UpdateCheckpointRequest) returns (CheckpointResponse){
+		option (google.api.http)={
+			put: "/api/administration/checkpoint/{id}"
+		};
+	}
+	rpc DeleteCheckpoint(Id) returns (blank){
+		option (google.api.http)={
+			delete: "/api/administration/checkpoint/{id}"
+		};
+	}
+
 	// Equipment
 	rpc GetAvailableEquipment (EquipmentIds) returns (EquipmentsResponse) {
 		option (google.api.http) = {
@@ -94,10 +127,29 @@ service Tour {
 	// TourExecution
 }
 
+message CreateCheckpointRequest{
+	CheckpointResponse checkpoint = 1;
+	string status = 2;
+	repeated bytes pictures = 3;
+}
+message UpdateCheckpointRequest{
+	CheckpointResponse checkpoint = 1;
+	string id = 2;
+	repeated bytes pictures = 3;
+}
+message PagedCheckpoints{
+	repeated CheckpointResponse results= 1;
+	int32 totalCount = 2;
+}
 message blank{}
 message Page{
 	int32 page = 1;
 	int32 pageSize = 2;
+}
+message PageWithId{
+	int32 page = 1;
+	int32 pageSize = 2;
+	string id = 3;
 }
 message Id{
 	string id = 1;
@@ -179,6 +231,9 @@ message CheckpointResponse{
 	//TODO checkpointSecret 
 	int64 encounterId = 10;
 	bool isSecretPrerequisite = 11;
+}
+message CheckpointsResponse{
+	repeated CheckpointResponse checkpoints = 1;
 }
 
 // TouristPosition

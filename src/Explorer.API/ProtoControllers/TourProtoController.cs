@@ -186,6 +186,81 @@ namespace Explorer.API.ProtoControllers
             return await Task.FromResult(response);
         }
 
+        public override async Task<PagedCheckpoints> GetAllCheckpoints(Page page,
+            ServerCallContext context)
+        {
+            var httpHandler = new HttpClientHandler();
+            httpHandler.ServerCertificateCustomValidationCallback = HttpClientHandler.DangerousAcceptAnyServerCertificateValidator;
+            var channel = GrpcChannel.ForAddress("http://host.docker.internal:8083/v1/tours", new GrpcChannelOptions { HttpHandler = httpHandler });
+
+            var client = new Tour.TourClient(channel);
+            var response = client.GetAllCheckpoints(page);
+
+            return await Task.FromResult(response);
+        }
+        public override async Task<CheckpointsResponse> GetAllCheckpointsByTour(PageWithId page,
+           ServerCallContext context)
+        {
+            var httpHandler = new HttpClientHandler();
+            httpHandler.ServerCertificateCustomValidationCallback = HttpClientHandler.DangerousAcceptAnyServerCertificateValidator;
+            var channel = GrpcChannel.ForAddress("http://host.docker.internal:8083/v1/tours", new GrpcChannelOptions { HttpHandler = httpHandler });
+
+            var client = new Tour.TourClient(channel);
+            var response = client.GetAllCheckpointsByTour(page);
+
+            return await Task.FromResult(response);
+        }
+        public override async Task<CheckpointResponse> GetCheckpointById(Id page,
+           ServerCallContext context)
+        {
+            var httpHandler = new HttpClientHandler();
+            httpHandler.ServerCertificateCustomValidationCallback = HttpClientHandler.DangerousAcceptAnyServerCertificateValidator;
+            var channel = GrpcChannel.ForAddress("http://host.docker.internal:8083/v1/tours", new GrpcChannelOptions { HttpHandler = httpHandler });
+
+            var client = new Tour.TourClient(channel);
+            var response = client.GetCheckpointById(page);
+
+            return await Task.FromResult(response);
+        }
+
+        public override async Task<CheckpointResponse> CreateCheckpoint(CreateCheckpointRequest page,
+           ServerCallContext context)
+        {
+            var httpHandler = new HttpClientHandler();
+            httpHandler.ServerCertificateCustomValidationCallback = HttpClientHandler.DangerousAcceptAnyServerCertificateValidator;
+            var channel = GrpcChannel.ForAddress("http://host.docker.internal:8083/v1/tours", new GrpcChannelOptions { HttpHandler = httpHandler });
+
+            var client = new Tour.TourClient(channel);
+            var response = client.CreateCheckpoint(page);
+
+            return await Task.FromResult(response);
+        }
+
+        public override async Task<CheckpointResponse> UpdateCheckpoint(UpdateCheckpointRequest page,
+           ServerCallContext context)
+        {
+            var httpHandler = new HttpClientHandler();
+            httpHandler.ServerCertificateCustomValidationCallback = HttpClientHandler.DangerousAcceptAnyServerCertificateValidator;
+            var channel = GrpcChannel.ForAddress("http://host.docker.internal:8083/v1/tours", new GrpcChannelOptions { HttpHandler = httpHandler });
+
+            var client = new Tour.TourClient(channel);
+            var response = client.UpdateCheckpoint(page);
+
+            return await Task.FromResult(response);
+        }
+        public override async Task<blank> DeleteCheckpoint(Id page,
+           ServerCallContext context)
+        {
+            var httpHandler = new HttpClientHandler();
+            httpHandler.ServerCertificateCustomValidationCallback = HttpClientHandler.DangerousAcceptAnyServerCertificateValidator;
+            var channel = GrpcChannel.ForAddress("http://host.docker.internal:8083/v1/tours", new GrpcChannelOptions { HttpHandler = httpHandler });
+
+            var client = new Tour.TourClient(channel);
+            var response = client.DeleteCheckpoint(page);
+
+            return await Task.FromResult(response);
+        }
+
         // PublishedTour
         // TourReview
         // PublicCheckpoint

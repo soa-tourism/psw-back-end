@@ -22,122 +22,122 @@ namespace Explorer.API.Controllers.Author.Administration
             _imageService = new ImageService();
         }
 
-        [HttpGet]
-        public async Task<ActionResult<PagedResult<CheckpointDto>>> GetAll([FromQuery] int page, [FromQuery] int pageSize)
-        {
-            using var response = await _httpClient.GetAsync("");
-            var result = await response.Content.ReadAsStringAsync();
+        //[HttpGet]
+        //public async Task<ActionResult<PagedResult<CheckpointDto>>> GetAll([FromQuery] int page, [FromQuery] int pageSize)
+        //{
+        //    using var response = await _httpClient.GetAsync("");
+        //    var result = await response.Content.ReadAsStringAsync();
 
-            if (!response.IsSuccessStatusCode)
-            {
-                var error = Result.Fail($"Failed to get checkpoints: {result}");
-                return CreateResponse(error);
-            }
+        //    if (!response.IsSuccessStatusCode)
+        //    {
+        //        var error = Result.Fail($"Failed to get checkpoints: {result}");
+        //        return CreateResponse(error);
+        //    }
 
-            var checkpoints = JsonSerializer.Deserialize<List<CheckpointDto>>(result);
-            if (checkpoints is null)
-            {
-                var noTours = Result.Ok("No checkpoints found.");
-                return CreateResponse(noTours);
+        //    var checkpoints = JsonSerializer.Deserialize<List<CheckpointDto>>(result);
+        //    if (checkpoints is null)
+        //    {
+        //        var noTours = Result.Ok("No checkpoints found.");
+        //        return CreateResponse(noTours);
 
-            }
+        //    }
 
-            var pagedResult = PaginateResult(page, pageSize, checkpoints);
-            return Ok(pagedResult);
-        }
+        //    var pagedResult = PaginateResult(page, pageSize, checkpoints);
+        //    return Ok(pagedResult);
+        //}
 
-        [HttpGet("details/{id}")]
-        [Authorize(Policy = "authorPolicy")]
-        public async Task<ActionResult<CheckpointDto>> GetById(string id)
-        {
-            using var response = await _httpClient.GetAsync(ConstructUrl("details/"+id));
-            var result = await response.Content.ReadAsStringAsync();
+        //[HttpGet("details/{id}")]
+        //[Authorize(Policy = "authorPolicy")]
+        //public async Task<ActionResult<CheckpointDto>> GetById(string id)
+        //{
+        //    using var response = await _httpClient.GetAsync(ConstructUrl("details/"+id));
+        //    var result = await response.Content.ReadAsStringAsync();
 
-            if (!response.IsSuccessStatusCode)
-            {
-                var errorResult = Result.Fail($"Failed to get checkpoint: {result}");
-                return CreateResponse(errorResult);
-            }
+        //    if (!response.IsSuccessStatusCode)
+        //    {
+        //        var errorResult = Result.Fail($"Failed to get checkpoint: {result}");
+        //        return CreateResponse(errorResult);
+        //    }
 
-            var tour = JsonSerializer.Deserialize<CheckpointDto>(result);
-            return Ok(tour);
-        }
+        //    var tour = JsonSerializer.Deserialize<CheckpointDto>(result);
+        //    return Ok(tour);
+        //}
 
-        [HttpPost("create/{status}")]
-        [Authorize(Policy = "authorPolicy")]
-        public async Task<ActionResult<CheckpointDto>> Create([FromForm] CheckpointDto checkpoint, [FromRoute] string status, [FromForm] List<IFormFile>? pictures = null)
-        {
-            if (pictures != null && pictures.Any())
-            {
-                var imageNames = _imageService.UploadImages(pictures);
-                checkpoint.Pictures = imageNames;
-            }
+        //[HttpPost("create/{status}")]
+        //[Authorize(Policy = "authorPolicy")]
+        //public async Task<ActionResult<CheckpointDto>> Create([FromForm] CheckpointDto checkpoint, [FromRoute] string status, [FromForm] List<IFormFile>? pictures = null)
+        //{
+        //    if (pictures != null && pictures.Any())
+        //    {
+        //        var imageNames = _imageService.UploadImages(pictures);
+        //        checkpoint.Pictures = imageNames;
+        //    }
 
-            using var jsonContent = new StringContent(JsonSerializer.Serialize(checkpoint), Encoding.UTF8, "application/json");
-            using var response = await _httpClient.PostAsync("", jsonContent);
+        //    using var jsonContent = new StringContent(JsonSerializer.Serialize(checkpoint), Encoding.UTF8, "application/json");
+        //    using var response = await _httpClient.PostAsync("", jsonContent);
 
-            var responseContent = await response.Content.ReadAsStringAsync();
-            var result = JsonSerializer.Deserialize<CheckpointDto>(responseContent);
+        //    var responseContent = await response.Content.ReadAsStringAsync();
+        //    var result = JsonSerializer.Deserialize<CheckpointDto>(responseContent);
 
-            return CreateResponse(result.ToResult());
-        }
+        //    return CreateResponse(result.ToResult());
+        //}
 
-        [HttpPut("{id}")]
-        [Authorize(Policy = "authorPolicy")]
-        public async Task<ActionResult<CheckpointDto>> Update([FromForm] CheckpointDto checkpoint, string id, [FromForm] List<IFormFile>? pictures = null)
-        {
-            if (pictures != null && pictures.Any())
-            {
-                var imageNames = _imageService.UploadImages(pictures);
-                checkpoint.Pictures = imageNames;
-            }
+        //[HttpPut("{id}")]
+        //[Authorize(Policy = "authorPolicy")]
+        //public async Task<ActionResult<CheckpointDto>> Update([FromForm] CheckpointDto checkpoint, string id, [FromForm] List<IFormFile>? pictures = null)
+        //{
+        //    if (pictures != null && pictures.Any())
+        //    {
+        //        var imageNames = _imageService.UploadImages(pictures);
+        //        checkpoint.Pictures = imageNames;
+        //    }
 
-            using var jsonContent = new StringContent(JsonSerializer.Serialize(checkpoint), Encoding.UTF8, "application/json");
-            using var response = await _httpClient.PutAsync(ConstructUrl(id), jsonContent);
+        //    using var jsonContent = new StringContent(JsonSerializer.Serialize(checkpoint), Encoding.UTF8, "application/json");
+        //    using var response = await _httpClient.PutAsync(ConstructUrl(id), jsonContent);
 
-            var responseContent = await response.Content.ReadAsStringAsync();
-            var result = JsonSerializer.Deserialize<CheckpointDto>(responseContent);
+        //    var responseContent = await response.Content.ReadAsStringAsync();
+        //    var result = JsonSerializer.Deserialize<CheckpointDto>(responseContent);
 
-            return CreateResponse(result.ToResult());
-        }
+        //    return CreateResponse(result.ToResult());
+        //}
 
-        [HttpDelete("{id}")]
-        [Authorize(Policy = "authorPolicy")]
-        public async Task<ActionResult> Delete(string id)
-        {
-            using var response = await _httpClient.DeleteAsync(ConstructUrl(id));
+        //[HttpDelete("{id}")]
+        //[Authorize(Policy = "authorPolicy")]
+        //public async Task<ActionResult> Delete(string id)
+        //{
+        //    using var response = await _httpClient.DeleteAsync(ConstructUrl(id));
 
-            if (response.IsSuccessStatusCode) return NoContent();
+        //    if (response.IsSuccessStatusCode) return NoContent();
 
-            var errorResult = Result.Fail("Failed to delete checkpoint.");
-            return CreateResponse(errorResult);
-        }
+        //    var errorResult = Result.Fail("Failed to delete checkpoint.");
+        //    return CreateResponse(errorResult);
+        //}
 
-        [HttpGet("{id}")]
-        [Authorize(Policy = "authorPolicy")]
-        public async Task<ActionResult<List<CheckpointDto>>> GetAllByTour([FromQuery] int page, [FromQuery] int pageSize, string id)
-        {
-            var requestUri = ConstructUrl(id);
+        //[HttpGet("{id}")]
+        //[Authorize(Policy = "authorPolicy")]
+        //public async Task<ActionResult<List<CheckpointDto>>> GetAllByTour([FromQuery] int page, [FromQuery] int pageSize, string id)
+        //{
+        //    var requestUri = ConstructUrl(id);
 
-            using var response = await _httpClient.GetAsync(requestUri);
-            var result = await response.Content.ReadAsStringAsync();
+        //    using var response = await _httpClient.GetAsync(requestUri);
+        //    var result = await response.Content.ReadAsStringAsync();
 
-            if (!response.IsSuccessStatusCode)
-            {
-                return BadRequest($"Failed to get checkpoints for tour: {result}");
-            }
+        //    if (!response.IsSuccessStatusCode)
+        //    {
+        //        return BadRequest($"Failed to get checkpoints for tour: {result}");
+        //    }
 
-            var checkpoints = JsonSerializer.Deserialize<List<CheckpointDto>>(result);
-            if (checkpoints is null)
-            {
-                var noToursCheckpoints = Result.Ok("No checkpoints for tour found.");
-                return CreateResponse(noToursCheckpoints);
+        //    var checkpoints = JsonSerializer.Deserialize<List<CheckpointDto>>(result);
+        //    if (checkpoints is null)
+        //    {
+        //        var noToursCheckpoints = Result.Ok("No checkpoints for tour found.");
+        //        return CreateResponse(noToursCheckpoints);
 
-            }
+        //    }
 
-            var pagedResult = PaginateResult(page, pageSize, checkpoints);
-            return Ok(pagedResult);
-        }
+        //    var pagedResult = PaginateResult(page, pageSize, checkpoints);
+        //    return Ok(pagedResult);
+        //}
 
 
         private string ConstructUrl(string relativePath)

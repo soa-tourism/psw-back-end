@@ -186,6 +186,10 @@ namespace Explorer.API.ProtoControllers
             return await Task.FromResult(response);
         }
 
+        // PublishedTour
+        // TourReview
+        // PublicCheckpoint
+        // Checkpoint
         public override async Task<PagedCheckpoints> GetAllCheckpoints(Page page,
             ServerCallContext context)
         {
@@ -261,11 +265,68 @@ namespace Explorer.API.ProtoControllers
             return await Task.FromResult(response);
         }
 
-        // PublishedTour
-        // TourReview
-        // PublicCheckpoint
-        // Checkpoint
         // TouristPosition
+        public override async Task<PagedTouristPositionResponse> GetAllTouristPostions(Page page,
+           ServerCallContext context)
+        {
+            var httpHandler = new HttpClientHandler();
+            httpHandler.ServerCertificateCustomValidationCallback = HttpClientHandler.DangerousAcceptAnyServerCertificateValidator;
+            var channel = GrpcChannel.ForAddress("http://host.docker.internal:8083/v1/position", new GrpcChannelOptions { HttpHandler = httpHandler });
+
+            var client = new Tour.TourClient(channel);
+            var response = client.GetAllTouristPostions(page);
+
+            return await Task.FromResult(response);
+        }
+        public override async Task<TouristPositionResponse> GetTouristPostionByCreatorId(TouristPositionByCreator creator,
+           ServerCallContext context)
+        {
+            var httpHandler = new HttpClientHandler();
+            httpHandler.ServerCertificateCustomValidationCallback = HttpClientHandler.DangerousAcceptAnyServerCertificateValidator;
+            var channel = GrpcChannel.ForAddress("http://host.docker.internal:8083/v1/position", new GrpcChannelOptions { HttpHandler = httpHandler });
+
+            var client = new Tour.TourClient(channel);
+            var response = client.GetTouristPostionByCreatorId(creator);
+
+            return await Task.FromResult(response);
+        }
+        public override async Task<TouristPositionResponse> CreateTouristPostion(TouristPositionResponse position,
+           ServerCallContext context)
+        {
+            var httpHandler = new HttpClientHandler();
+            httpHandler.ServerCertificateCustomValidationCallback = HttpClientHandler.DangerousAcceptAnyServerCertificateValidator;
+            var channel = GrpcChannel.ForAddress("http://host.docker.internal:8083/v1/position", new GrpcChannelOptions { HttpHandler = httpHandler });
+
+            var client = new Tour.TourClient(channel);
+            var response = client.CreateTouristPostion(position);
+
+            return await Task.FromResult(response);
+        }
+        public override async Task<TouristPositionResponse> UpdateTouristPosition(UpdateTouristPositionRequest position,
+          ServerCallContext context)
+        {
+            var httpHandler = new HttpClientHandler();
+            httpHandler.ServerCertificateCustomValidationCallback = HttpClientHandler.DangerousAcceptAnyServerCertificateValidator;
+            var channel = GrpcChannel.ForAddress("http://host.docker.internal:8083/v1/position", new GrpcChannelOptions { HttpHandler = httpHandler });
+
+            var client = new Tour.TourClient(channel);
+            var response = client.UpdateTouristPosition(position);
+
+            return await Task.FromResult(response);
+        }
+        public override async Task<blank> DeleteTouristPosition(Id id,
+          ServerCallContext context)
+        {
+            var httpHandler = new HttpClientHandler();
+            httpHandler.ServerCertificateCustomValidationCallback = HttpClientHandler.DangerousAcceptAnyServerCertificateValidator;
+            var channel = GrpcChannel.ForAddress("http://host.docker.internal:8083/v1/position", new GrpcChannelOptions { HttpHandler = httpHandler });
+
+            var client = new Tour.TourClient(channel);
+            var response = client.DeleteTouristPosition(id);
+
+            return await Task.FromResult(response);
+        }
+
         // TourExecution
     }
 }

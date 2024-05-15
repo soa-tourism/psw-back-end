@@ -6,39 +6,6 @@ import "Protos/google/api/annotations.proto";
 import "google/protobuf/timestamp.proto";
 
 service Tour {
-	//Checkpoints
-	rpc GetAllCheckpoints(Page) returns (PagedCheckpoints){
-		option (google.api.http) = {
-			get: "/api/administration/checkpoint"
-		};
-	}
-	rpc GetAllCheckpointsByTour(PageWithId) returns (CheckpointsResponse){
-		option (google.api.http) = {
-			get: "/api/administration/checkpoint/{id}"
-		};
-	}
-	rpc GetCheckpointById(Id) returns (CheckpointResponse){
-		option (google.api.http) = {
-			get: "/api/administration/checkpoint/details/{id}"
-		};
-	}
-	rpc CreateCheckpoint(CreateCheckpointRequest) returns (CheckpointResponse){
-		option (google.api.http)={
-			post: "/api/administration/checkpoint/create/{status}"
-			body:"*"
-		};
-	}
-	rpc UpdateCheckpoint(UpdateCheckpointRequest) returns (CheckpointResponse){
-		option (google.api.http)={
-			put: "/api/administration/checkpoint/{id}"
-		};
-	}
-	rpc DeleteCheckpoint(Id) returns (blank){
-		option (google.api.http)={
-			delete: "/api/administration/checkpoint/{id}"
-		};
-	}
-
 	// Equipment
 	rpc GetAvailableEquipment (EquipmentIds) returns (EquipmentsResponse) {
 		option (google.api.http) = {
@@ -122,8 +89,67 @@ service Tour {
 	// PublishedTour
 	// TourReview
 	// PublicCheckpoint
-    // Checkpoint
+    // Checkpoints
+	rpc GetAllCheckpoints(Page) returns (PagedCheckpoints){
+		option (google.api.http) = {
+			get: "/api/administration/checkpoint"
+		};
+	}
+	rpc GetAllCheckpointsByTour(PageWithId) returns (CheckpointsResponse){
+		option (google.api.http) = {
+			get: "/api/administration/checkpoint/{id}"
+		};
+	}
+	rpc GetCheckpointById(Id) returns (CheckpointResponse){
+		option (google.api.http) = {
+			get: "/api/administration/checkpoint/details/{id}"
+		};
+	}
+	rpc CreateCheckpoint(CreateCheckpointRequest) returns (CheckpointResponse){
+		option (google.api.http)={
+			post: "/api/administration/checkpoint/create/{status}"
+			body:"*"
+		};
+	}
+	rpc UpdateCheckpoint(UpdateCheckpointRequest) returns (CheckpointResponse){
+		option (google.api.http)={
+			put: "/api/administration/checkpoint/{id}"
+		};
+	}
+	rpc DeleteCheckpoint(Id) returns (blank){
+		option (google.api.http)={
+			delete: "/api/administration/checkpoint/{id}"
+		};
+	}
+
 	// TouristPosition
+	rpc GetAllTouristPostions(Page) returns (PagedTouristPositionResponse){
+		option (google.api.http) = {
+			get: "/api/tourism/position"
+		};
+	}
+	rpc GetTouristPostionByCreatorId(TouristPositionByCreator) returns (TouristPositionResponse){
+		option (google.api.http) = {
+			get: "/api/tourism/position/{id}"
+		};
+	}
+	rpc CreateTouristPostion(TouristPositionResponse) returns (TouristPositionResponse){
+		option (google.api.http)={
+			post: "/api/tourism/position"
+			body:"*"
+		};
+	}
+	rpc UpdateTouristPosition(UpdateTouristPositionRequest) returns (TouristPositionResponse){
+		option (google.api.http)={
+			put: "/api/tourism/position/{id}"
+		};
+	}
+	rpc DeleteTouristPosition(Id) returns (blank){
+		option (google.api.http)={
+			delete: "/api/tourism/position/{id}"
+		};
+	}
+
 	// TourExecution
 }
 
@@ -195,7 +221,7 @@ message ToursResponse{
 }
 message PagedToursResponse{
 	repeated TourResponse results = 1;
-	int32 totalCounts = 2;
+	int32 totalCount = 2;
 }
 message UpdateTourId{
 	TourResponse tour = 1;
@@ -237,5 +263,24 @@ message CheckpointsResponse{
 }
 
 // TouristPosition
+message TouristPositionResponse{
+	string id = 1;
+	int64 creatorId = 2;
+	float longitude = 3;
+	float latitude = 4;
+}
+message PagedTouristPositionResponse{
+	repeated TouristPositionResponse results = 1;
+	int32 totalCount = 2;
+}
+message TouristPositionByCreator{
+	int32 page = 1;
+	int32 pageSize = 2;
+	string id = 3;
+}
+message UpdateTouristPositionRequest{
+	TouristPositionResponse position = 1;
+	string id = 2;
+}
 
 // TourExecution

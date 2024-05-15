@@ -192,7 +192,7 @@ message EquipmentResponse{
 	string description = 3;
 }
 message EquipmentsResponse{
-	repeated EquipmentResponse EquipmentResponse = 1;
+	repeated EquipmentResponse results = 1;
 }
 message UpdateEquipmentId{
 	EquipmentResponse equipment = 1;
@@ -217,7 +217,7 @@ message TourResponse{
     repeated CheckpointResponse checkpoints = 10;
 }
 message ToursResponse{
-	repeated TourResponse tours = 1;
+	repeated TourResponse results = 1;
 }
 message PagedToursResponse{
 	repeated TourResponse results = 1;

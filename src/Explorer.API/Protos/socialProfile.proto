@@ -28,8 +28,7 @@ service SocialProfile {
   }
   rpc Follow (FollowRequest) returns (SocialProfilesResponse) {
     option (google.api.http) = {
-      put: "/api/social-profile/follow/{userId}/{followerId}"
-      body: "*"
+      delete: "/api/social-profile/follow/{userId}/{followerId}"
     };
   }
   rpc Unfollow (UnfollowRequest) returns (SocialProfilesResponse) {

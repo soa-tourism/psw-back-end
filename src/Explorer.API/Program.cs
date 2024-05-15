@@ -35,6 +35,7 @@ app.UseAuthorization();
 app.UseStaticFiles();
 app.MapControllers();
 app.MapGrpcService<SocialProfileProtoController>();
+app.MapGrpcService<EncounterProtoController>();
 
 app.Run();
 

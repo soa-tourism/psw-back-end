@@ -1,0 +1,67 @@
+
+syntax = "proto3";
+
+option csharp_namespace = "GrpcServiceTranscoding";
+import "Protos/google/api/annotations.proto";
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/empty.proto";
+
+
+service Encounter {
+  rpc Create(CreateRequest) returns (EncounterDto){
+      option (google.api.http) ={
+          post: "/api/administration/encounter"
+          body: "*"
+      };
+  }
+  rpc Update(UpdateRequest) returns (EncounterDto){
+      option (google.api.http)={
+          put: "/api/administration/encounter"
+          body: "*"
+      };
+  }
+  rpc Delete(EncounterId) returns (google.protobuf.Empty){
+      option (google.api.http)={
+          delete: "/api/administration/encounter/{id}"
+      };
+  }
+  rpc GetById(EncounterId) returns (EncounterDto){
+      option (google.api.http)={
+          get: "/api/administration/encounter/{id}"
+      };
+  }
+}
+
+message EncounterId{
+    int32 id = 1;
+}
+
+message UpdateRequest{
+    EncounterDto encounter = 1;
+    repeated bytes image_f = 2;
+}
+
+message CreateRequest {
+  EncounterDto encounter = 1;
+  int64 checkpoint_id = 2;
+  bool is_secret_prerequisite = 3;
+  repeated bytes image_f = 4;
+}
+
+message EncounterDto{
+    int64 authorId = 1;
+    int32 id = 2;
+    string name =3;
+    string description = 4;
+    int32 xP = 5;
+    string status = 6;
+    string type = 7;
+    double longitude = 8;
+    double latitude = 9;
+    double locationLongitude = 10;
+    double locationLatitude = 11;
+    string image =12;
+    double range = 13;
+    int32 requiredPeople = 14;
+    repeated int32 activeTouristsIds = 15;
+}

@@ -26,7 +26,7 @@ services:
     networks:
       - database
     ports:
-      - "8090:8090"
+      - "8087:8087"
     environment:
       DATABASE_HOST: explorer_db
       DATABASE_PORT: 5432

@@ -26,101 +26,101 @@ namespace Explorer.API.Controllers.Author.Administration
         }
 
 
-        [HttpPost]
-        public async Task<ActionResult<EncounterDto>> Create([FromForm] EncounterDto encounter,[FromQuery] long checkpointId, [FromQuery] bool isSecretPrerequisite, [FromForm] List<IFormFile>? imageF = null)
-        {
+        //[HttpPost]
+        //public async Task<ActionResult<EncounterDto>> Create([FromForm] EncounterDto encounter,[FromQuery] long checkpointId, [FromQuery] bool isSecretPrerequisite, [FromForm] List<IFormFile>? imageF = null)
+        //{
             
-            if (imageF != null && imageF.Any())
-            {
-                var imageNames = _imageService.UploadImages(imageF);
-                if (encounter.Type =="Location")
-                    encounter.Image = imageNames[0];
-            }
-            var json = JsonSerializer.Serialize(encounter);
+        //    if (imageF != null && imageF.Any())
+        //    {
+        //        var imageNames = _imageService.UploadImages(imageF);
+        //        if (encounter.Type =="Location")
+        //            encounter.Image = imageNames[0];
+        //    }
+        //    var json = JsonSerializer.Serialize(encounter);
 
-            var content = new StringContent(json, Encoding.UTF8, "application/json");
+        //    var content = new StringContent(json, Encoding.UTF8, "application/json");
 
-            HttpResponseMessage response = await client.PostAsync($"{baseUrl}/create/{checkpointId}/{isSecretPrerequisite}", content);
-            Response.ContentType = "application/json";
-            if (response.IsSuccessStatusCode)
-            {
-                // Read response content as JSON string
-                string responseJson = await response.Content.ReadAsStringAsync();
+        //    HttpResponseMessage response = await client.PostAsync($"{baseUrl}/create/{checkpointId}/{isSecretPrerequisite}", content);
+        //    Response.ContentType = "application/json";
+        //    if (response.IsSuccessStatusCode)
+        //    {
+        //        // Read response content as JSON string
+        //        string responseJson = await response.Content.ReadAsStringAsync();
 
-                // Deserialize JSON string to EncounterDto object
-                EncounterDto responseEncounter = JsonSerializer.Deserialize<EncounterDto>(responseJson);
+        //        // Deserialize JSON string to EncounterDto object
+        //        EncounterDto responseEncounter = JsonSerializer.Deserialize<EncounterDto>(responseJson);
 
-                var result = new Result<EncounterDto>().WithValue(responseEncounter);
-                // Use the responseEncounter object as needed
-                return CreateResponse(result);
-            }
+        //        var result = new Result<EncounterDto>().WithValue(responseEncounter);
+        //        // Use the responseEncounter object as needed
+        //        return CreateResponse(result);
+        //    }
             
 
-            return CreateResponse(new Result<EncounterDto>().WithError("Error"));
-        }
+        //    return CreateResponse(new Result<EncounterDto>().WithError("Error"));
+        //}
 
-        [HttpPut]
-        public async Task<ActionResult<EncounterDto>> Update([FromForm] EncounterDto encounter, [FromForm] List<IFormFile>? imageF = null)
-        {
+        //[HttpPut]
+        //public async Task<ActionResult<EncounterDto>> Update([FromForm] EncounterDto encounter, [FromForm] List<IFormFile>? imageF = null)
+        //{
 
-            if (imageF != null && imageF.Any())
-            {
-                var imageNames = _imageService.UploadImages(imageF);
-                if (encounter.Type == "Location")
-                    encounter.Image = imageNames[0];
-            }
-            var json = JsonSerializer.Serialize(encounter);
+        //    if (imageF != null && imageF.Any())
+        //    {
+        //        var imageNames = _imageService.UploadImages(imageF);
+        //        if (encounter.Type == "Location")
+        //            encounter.Image = imageNames[0];
+        //    }
+        //    var json = JsonSerializer.Serialize(encounter);
 
-            var content = new StringContent(json, Encoding.UTF8, "application/json");
+        //    var content = new StringContent(json, Encoding.UTF8, "application/json");
 
-            HttpResponseMessage response = await client.PutAsync($"{baseUrl}/update", content);
-            Response.ContentType = "application/json";
-            if (response.IsSuccessStatusCode)
-            {
-                // Read response content as JSON string
-                string responseJson = await response.Content.ReadAsStringAsync();
+        //    HttpResponseMessage response = await client.PutAsync($"{baseUrl}/update", content);
+        //    Response.ContentType = "application/json";
+        //    if (response.IsSuccessStatusCode)
+        //    {
+        //        // Read response content as JSON string
+        //        string responseJson = await response.Content.ReadAsStringAsync();
 
-                // Deserialize JSON string to EncounterDto object
-                EncounterDto responseEncounter = JsonSerializer.Deserialize<EncounterDto>(responseJson);
+        //        // Deserialize JSON string to EncounterDto object
+        //        EncounterDto responseEncounter = JsonSerializer.Deserialize<EncounterDto>(responseJson);
 
-                var result = new Result<EncounterDto>().WithValue(responseEncounter);
-                // Use the responseEncounter object as needed
-                return CreateResponse(result);
-            }
-
-
-            return CreateResponse(new Result<EncounterDto>().WithError("Error"));
-        }
-
-        [HttpDelete("{id:int}")]
-        public async Task<ActionResult> Delete(int id)
-        {
-            HttpResponseMessage response = await client.DeleteAsync($"{baseUrl}/delete/{id}");
-            return StatusCode((int)response.StatusCode);
-        }
-
-        [HttpGet("{id:int}")]
-        public async Task<ActionResult<EncounterDto>> GetById(int id)
-        {
-
-            HttpResponseMessage response = await client.GetAsync($"{baseUrl}/get/{id}");
-            Response.ContentType = "application/json";
-            if (response.IsSuccessStatusCode)
-            {
-                // Read response content as JSON string
-                string responseJson = await response.Content.ReadAsStringAsync();
-
-                // Deserialize JSON string to EncounterDto object
-                EncounterDto responseEncounter = JsonSerializer.Deserialize<EncounterDto>(responseJson);
-
-                var result = new Result<EncounterDto>().WithValue(responseEncounter);
-                // Use the responseEncounter object as needed
-                return CreateResponse(result);
-            }
+        //        var result = new Result<EncounterDto>().WithValue(responseEncounter);
+        //        // Use the responseEncounter object as needed
+        //        return CreateResponse(result);
+        //    }
 
 
-            return CreateResponse(new Result<EncounterDto>().WithError("Error"));
-        }
+        //    return CreateResponse(new Result<EncounterDto>().WithError("Error"));
+        //}
+
+        //[HttpDelete("{id:int}")]
+        //public async Task<ActionResult> Delete(int id)
+        //{
+        //    HttpResponseMessage response = await client.DeleteAsync($"{baseUrl}/delete/{id}");
+        //    return StatusCode((int)response.StatusCode);
+        //}
+
+        //[HttpGet("{id:int}")]
+        //public async Task<ActionResult<EncounterDto>> GetById(int id)
+        //{
+
+        //    HttpResponseMessage response = await client.GetAsync($"{baseUrl}/get/{id}");
+        //    Response.ContentType = "application/json";
+        //    if (response.IsSuccessStatusCode)
+        //    {
+        //        // Read response content as JSON string
+        //        string responseJson = await response.Content.ReadAsStringAsync();
+
+        //        // Deserialize JSON string to EncounterDto object
+        //        EncounterDto responseEncounter = JsonSerializer.Deserialize<EncounterDto>(responseJson);
+
+        //        var result = new Result<EncounterDto>().WithValue(responseEncounter);
+        //        // Use the responseEncounter object as needed
+        //        return CreateResponse(result);
+        //    }
+
+
+        //    return CreateResponse(new Result<EncounterDto>().WithError("Error"));
+        //}
 
     }
 }

@@ -5,8 +5,6 @@ option csharp_namespace = "GrpcServiceTranscoding";
 import "Protos/google/api/annotations.proto";
 import "google/protobuf/timestamp.proto";
 import "google/protobuf/empty.proto";
-
-
 service Encounter {
   rpc Create(CreateRequest) returns (EncounterDto){
       option (google.api.http) ={
@@ -30,6 +28,67 @@ service Encounter {
           get: "/api/administration/encounter/{id}"
       };
   }
+
+  rpc CreateEncounterExecution(EncounterExecutionDto) returns (EncounterExecutionDto){
+      option (google.api.http) ={
+          post: "/api/tourist/encounter-execution"
+          body: "*"
+      };
+  }
+  rpc GetEncounterById(EncounterId) returns (EncounterDto){
+      option (google.api.http)={
+          get: "/api/tourist/encounter-execution/{id}"
+      };
+  }
+  rpc UpdateEncounterExecution(EncounterExecutionDto) returns (EncounterExecutionDto){
+      option (google.api.http)={
+          put: "/api/tourist/encounter-execution"
+          body: "*"
+      };
+  }
+  rpc ActivateEncounterExecution(ActivateRequest) returns (EncounterExecutionDto){
+      option (google.api.http)={
+          put: "/api/tourist/encounter-execution/activate/{id}"
+          body: "*"
+      };
+  }
+  rpc CompleteExecution(ActivateRequest) returns(EncounterExecutionDto){
+      option (google.api.http)={
+          put: "/api/tourist/encounter-execution/completed/{id}"
+          body: "*"
+      };
+  }
+  rpc DeleteExecution(EncounterId) returns (google.protobuf.Empty){
+      option (google.api.http)={
+          delete: "/api/tourist/encounter-execution/{id}"
+      };
+  }
+  rpc GetAllExecutionsByTourist(EncounterId) returns (PagedExecutions){
+      option (google.api.http)={
+          get: "/api/tourist/encounter-execution/getAllByTourist/{id}"
+      };
+  }
+  rpc GetAllCompletedExecutionsByTourist(PagedRequestWithId) returns (PagedExecutions){
+      option (google.api.http)={
+          get: "/api/tourist/encounter-execution/get-all-completed/{id}"
+      };
+  }
+}
+message PagedRequestWithId{
+    int32 id = 1;
+    int32 page = 2;
+    int32 pageSize = 3;
+}
+
+message PagedExecutions{
+    repeated EncounterExecutionDto results = 1;
+    int32 totalCount = 2;
+}
+
+message ActivateRequest{
+    int32 id = 1;
+    double touristLatitude = 2;
+    double touristLongitude = 3;
 }
 
 message EncounterId{
@@ -46,6 +105,15 @@ message CreateRequest {
   int64 checkpoint_id = 2;
   bool is_secret_prerequisite = 3;
   repeated bytes image_f = 4;
+}
+
+message EncounterExecutionDto{
+    int64 id = 1;
+    int64 encounterId = 2;
+    EncounterDto encounterDto = 3;
+    int64 touristId = 4;
+    string status = 5;
+    google.protobuf.Timestamp startTime = 6;
 }
 
 message EncounterDto{

@@ -59,5 +59,77 @@ namespace Explorer.API.ProtoControllers
 
             return await Task.FromResult(response);
         }
+        public override async Task<EncounterExecutionDto> CreateEncounterExecution(EncounterExecutionDto executionDto,
+            ServerCallContext context)
+        {
+            var client = getClient();
+            _logger.Log(LogLevel.Warning, "Creating execution with startTime:" + executionDto.StartTime.ToString());
+            var response = client.CreateEncounterExecution(executionDto);
+
+            return await Task.FromResult(response);
+        }
+        public override async Task<EncounterDto> GetEncounterById(EncounterId id,
+            ServerCallContext context)
+        {
+            var client = getClient();
+            _logger.Log(LogLevel.Warning, "Getting encounter with id:" + id.Id.ToString());
+            var response = client.GetEncounterById(id);
+
+            return await Task.FromResult(response);
+        }
+        public override async Task<EncounterExecutionDto> UpdateEncounterExecution(EncounterExecutionDto executionDto,
+            ServerCallContext context)
+        {
+            var client = getClient();
+            _logger.Log(LogLevel.Warning, "Updating encounter execution with startTime:" + executionDto.StartTime.ToString());
+            var response = client.UpdateEncounterExecution(executionDto);
+
+            return await Task.FromResult(response);
+        }
+        public override async Task<EncounterExecutionDto> ActivateEncounterExecution(ActivateRequest request,
+            ServerCallContext context)
+        {
+            var client = getClient();
+            _logger.Log(LogLevel.Warning, "Activating encounter execution with touristLatitude:" + request.TouristLatitude.ToString());
+            var response = client.ActivateEncounterExecution(request);
+
+            return await Task.FromResult(response);
+        }
+        public override async Task<EncounterExecutionDto> CompleteExecution(ActivateRequest request,
+            ServerCallContext context)
+        {
+            var client = getClient();
+            _logger.Log(LogLevel.Warning, "Completing encounter execution with touristLatitude:" + request.TouristLatitude.ToString());
+            var response = client.CompleteExecution(request);
+
+            return await Task.FromResult(response);
+        }
+        public override async Task<Empty> DeleteExecution(EncounterId id,
+            ServerCallContext context)
+        {
+            var client = getClient();
+            _logger.Log(LogLevel.Warning, "Deleting encounter execution with id:" + id.Id.ToString());
+            var response = client.DeleteExecution(id);
+
+            return await Task.FromResult(response);
+        }
+        public override async Task<PagedExecutions> GetAllExecutionsByTourist(EncounterId id,
+            ServerCallContext context)
+        {
+            var client = getClient();
+            _logger.Log(LogLevel.Warning, "Getting all encounter executions bz the tourist with id:" + id.Id.ToString());
+            var response = client.GetAllExecutionsByTourist(id);
+
+            return await Task.FromResult(response);
+        }
+        public override async Task<PagedExecutions> GetAllCompletedExecutionsByTourist(PagedRequestWithId id,
+            ServerCallContext context)
+        {
+            var client = getClient();
+            _logger.Log(LogLevel.Warning, "Getting all completed encounter executions bz the tourist with id:" + id.Id.ToString());
+            var response = client.GetAllCompletedExecutionsByTourist(id);
+
+            return await Task.FromResult(response);
+        }
     }
 }

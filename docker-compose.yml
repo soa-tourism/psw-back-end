@@ -2,7 +2,8 @@ version: '3.9'
 x-logging: &fluent-bit
   driver: fluentd
   options:
-    fluentd-address: 172.18.0.5:24224
+    fluentd-address: 172.18.0.9:24224
+
 services:
   explorer:
     build:
@@ -53,6 +54,7 @@ services:
       - NEO4J_USERNAME=neo4j
       - NEO4J_PASS=NekaSifra
       - JAEGER_ENDPOINT=http://jaeger:14268/api/traces
+    logging: *fluent-bit
     depends_on:
       neo4j:
         condition: service_healthy

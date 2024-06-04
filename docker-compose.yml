@@ -38,6 +38,12 @@ services:
       DATABASE_PASSWORD: super
       DATABASE_USER: postgres
       DATABASE_SCHEMA: explorer
+      NATS_HOST: nats
+      NATS_PORT: 4222
+      NATS_USER: ruser
+      NATS_PASS: T0pS3cr3t
+      CREATE_ENCOUNTER_COMMAND_SUBJECT: encounter.create.command
+      CREATE_ENCOUNTER_REPLY_SUBJECT: encounter.create.reply
     depends_on:
       - explorer_db
 
@@ -91,8 +97,16 @@ services:
     restart: on-failure
     ports:
       - "8083:8083"
+    networks:
+      - database
     environment:
       - MONGO_DB_URI=mongodb://root:pass@mongo:27017
+      - NATS_HOST=nats
+      - NATS_PORT=4222
+      - NATS_USER=ruser
+      - NATS_PASS=T0pS3cr3t
+      - CREATE_ENCOUNTER_COMMAND_SUBJECT=encounter.create.command
+      - CREATE_ENCOUNTER_REPLY_SUBJECT=encounter.create.reply
     depends_on:
       mongo:
         condition: service_healthy
@@ -121,6 +135,8 @@ services:
     restart: always
     ports:
       - "27017:27017"
+    networks:
+      - database
     environment:
       MONGO_INITDB_ROOT_USERNAME: root
       MONGO_INITDB_ROOT_PASSWORD: pass
@@ -136,6 +152,8 @@ services:
   mongo-express:
     image: mongo-express:latest
     restart: always
+    networks:
+      - database
     environment:
       - ME_CONFIG_MONGODB_SERVER=mongo
       - ME_CONFIG_MONGODB_ADMINUSERNAME=root
@@ -150,6 +168,12 @@ services:
     volumes:
       - mongo_express_data:/data/db
   
+  nats:
+      image: nats
+      container_name: nats
+      restart: on-failure
+      networks:
+        - database
 
 volumes:
   explorer-data:

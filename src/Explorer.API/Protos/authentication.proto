@@ -6,23 +6,44 @@ import "Protos/google/api/annotations.proto";
 package Authorize;
 
 service Authorize {
-  rpc Authorize (Credentials) returns (AuthenticationTokens) {
+  rpc Login (Credentials) returns (AuthenticationTokens) {
     option (google.api.http) = {
-      post: "/v1/authorize"
+      post: "/api/users/login"
+      body: "*"
+    };
+  }
+
+  rpc Register (AccountRegistrationRequest) returns (AccountRegistrationResponse) {
+    option (google.api.http) = {
+      post: "/api/users"
       body: "*"
     };
   }
 }
 
-// The request message containing the user's name.
 message Credentials {
-
-  string Username = 1;
-  string Password = 2;
+  string username = 1;
+  string password = 2;
 }
 
-// The response message containing the greetings.
 message AuthenticationTokens {
-  int32 Id = 1;
-  string AccessToken = 2;
+  int64 id = 1;
+  string access_token = 2;
+}
+
+message AccountRegistrationRequest {
+  string username = 1;
+  string password = 2;
+  string email = 3;
+  string name = 4;
+  int32 role = 5;
+  string profilePictureUrl = 6;
+  string biography = 7;
+  string motto = 8;
+  string surname = 9;
+}
+
+message AccountRegistrationResponse {
+  bool success = 1;
+  int64 id = 2;
 }

@@ -30,25 +30,12 @@ ENV DATABASE_HOST=""
 ENV DATABASE_PASSWORD=""
 ENV DATABASE_USERNAME=""
 
-ENV STAKEHOLDERS_TARGET_PROJECT=Explorer.Stakeholders.Infrastructure
-
 ENV BLOG_TARGET_PROJECT=Explorer.Blog.Infrastructure
 
 ENV PAYMENTS_TARGET_PROJECT=Explorer.Payments.Infrastructure
 
 
 CMD PATH="$PATH:/root/.dotnet/tools" \
-    dotnet-ef migrations add "${MIGRATION}-stakeholders" \
-        -s "${STARTUP_PROJECT}/${STARTUP_PROJECT}.csproj" \
-        -p "Modules/Stakeholders/${STAKEHOLDERS_TARGET_PROJECT}/${STAKEHOLDERS_TARGET_PROJECT}.csproj" \
-        -c "StakeholdersContext" \
-        --configuration Release && \
-    PATH="$PATH:/root/.dotnet/tools" \   
-    dotnet-ef database update "${MIGRATION}-stakeholders" \
-        -s "${STARTUP_PROJECT}/${STARTUP_PROJECT}.csproj" \
-        -p "Modules/Stakeholders/${STAKEHOLDERS_TARGET_PROJECT}/${STAKEHOLDERS_TARGET_PROJECT}.csproj" \
-        -c "StakeholdersContext" \
-        --configuration Release && \
     dotnet-ef migrations add "${MIGRATION}-blog" \
         -s "${STARTUP_PROJECT}/${STARTUP_PROJECT}.csproj" \
         -p "Modules/Blog/${BLOG_TARGET_PROJECT}/${BLOG_TARGET_PROJECT}.csproj" \

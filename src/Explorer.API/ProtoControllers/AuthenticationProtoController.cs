@@ -1,135 +1,74 @@
-﻿using Google.Protobuf.WellKnownTypes;
+﻿using FluentResults;
 using Grpc.Core;
 using Grpc.Net.Client;
 using GrpcServiceTranscoding;
-using Microsoft.AspNetCore.Mvc;
 
 namespace Explorer.API.ProtoControllers
 {
-    public class EncounterProtoController : Encounter.EncounterBase
+    public class AuthenticationProtoController : Authorize.AuthorizeBase
     {
-        private readonly ILogger<EncounterProtoController> _logger;
+        private readonly ILogger<AuthenticationProtoController> _logger;
 
-        public EncounterProtoController(ILogger<EncounterProtoController> logger)
+        public AuthenticationProtoController(ILogger<AuthenticationProtoController> logger)
         {
             _logger = logger;
         }
-        private Encounter.EncounterClient getClient()
-        {
-            var httpHandler = new HttpClientHandler();
-            httpHandler.ServerCertificateCustomValidationCallback = HttpClientHandler.DangerousAcceptAnyServerCertificateValidator;
-            var channel = GrpcChannel.ForAddress("http://host.docker.internal:8087", new GrpcChannelOptions { HttpHandler = httpHandler });
 
-            return new Encounter.EncounterClient(channel);
+        private static Authorize.AuthorizeClient GetClient()
+        {
+            var httpHandler = new HttpClientHandler
+            {
+                ServerCertificateCustomValidationCallback = HttpClientHandler.DangerousAcceptAnyServerCertificateValidator
+            };
+            var channel = GrpcChannel.ForAddress("http://host.docker.internal:8089", new GrpcChannelOptions { HttpHandler = httpHandler });
+
+            return new Authorize.AuthorizeClient(channel);
         }
 
-        public override async Task<EncounterDto> Create(CreateRequest request,
-            ServerCallContext context)
+        private static SocialProfile.SocialProfileClient GetSocialProfileClient()
         {
-            var client = getClient();
-            _logger.Log(LogLevel.Warning, request.ToString());
-            var response = client.Create(request);
+            var httpHandler = new HttpClientHandler
+            {
+                ServerCertificateCustomValidationCallback = HttpClientHandler.DangerousAcceptAnyServerCertificateValidator
+            };
+            var channel = GrpcChannel.ForAddress("http://host.docker.internal:8082", new GrpcChannelOptions { HttpHandler = httpHandler });
+
+            return new SocialProfile.SocialProfileClient(channel);
+        }
+
+
+        public override async Task<AuthenticationTokens> Login(Credentials request, ServerCallContext context)
+        {
+            var client = GetClient();
+            var response = await client.LoginAsync(request);
+            _logger.Log(LogLevel.Warning, message: request.ToString());
 
             return await Task.FromResult(response);
         }
-        public override async Task<EncounterDto> Update(UpdateRequest request,
-            ServerCallContext context)
-        {
-            var client = getClient();
-            _logger.Log(LogLevel.Warning, request.ToString());
-            var response = client.Update(request);
 
-            return await Task.FromResult(response);
-        }
-        public override async Task<Empty> Delete(EncounterId id,
-            ServerCallContext context)
+        public override async Task<AccountRegistrationResponse> Register(AccountRegistrationRequest request, ServerCallContext context)
         {
-            var client = getClient();
-            _logger.Log(LogLevel.Warning, "Deleting encounter with id:" + id.Id.ToString());
-            var response = client.Delete(id);
+        
+            var authClient = GetClient();
+            var authResponse = await authClient.RegisterAsync(request);
+            _logger.Log(LogLevel.Warning, message: request.ToString());
 
-            return await Task.FromResult(response);
-        }
-        public override async Task<EncounterDto> GetById(EncounterId id,
-            ServerCallContext context)
-        {
-            var client = getClient();
-            _logger.Log(LogLevel.Warning, "Getting encounter with id:" + id.Id.ToString());
-            var response = client.GetById(id);
+            
+            if (await Task.FromResult(authResponse) == null)
+            {
+                return await Task.FromResult(authResponse);
+            }
 
-            return await Task.FromResult(response);
-        }
-        public override async Task<EncounterExecutionDto> CreateEncounterExecution(EncounterExecutionDto executionDto,
-            ServerCallContext context)
-        {
-            var client = getClient();
-            _logger.Log(LogLevel.Warning, "Creating execution with startTime:" + executionDto.StartTime.ToString());
-            var response = client.CreateEncounterExecution(executionDto);
+            var socialProfileClient = GetSocialProfileClient();
+            var socialProfileRequest = new SocialProfileRequest
+            {
+                UserId = authResponse.Id,
+                Username = request.Username,
+            };
+            socialProfileClient.CreateSocialProfile(socialProfileRequest);
 
-            return await Task.FromResult(response);
-        }
-        public override async Task<EncounterDto> GetEncounterById(EncounterId id,
-            ServerCallContext context)
-        {
-            var client = getClient();
-            _logger.Log(LogLevel.Warning, "Getting encounter with id:" + id.Id.ToString());
-            var response = client.GetEncounterById(id);
+            return await Task.FromResult(authResponse);
 
-            return await Task.FromResult(response);
-        }
-        public override async Task<EncounterExecutionDto> UpdateEncounterExecution(EncounterExecutionDto executionDto,
-            ServerCallContext context)
-        {
-            var client = getClient();
-            _logger.Log(LogLevel.Warning, "Updating encounter execution with startTime:" + executionDto.StartTime.ToString());
-            var response = client.UpdateEncounterExecution(executionDto);
-
-            return await Task.FromResult(response);
-        }
-        public override async Task<EncounterExecutionDto> ActivateEncounterExecution(ActivateRequest request,
-            ServerCallContext context)
-        {
-            var client = getClient();
-            _logger.Log(LogLevel.Warning, "Activating encounter execution with touristLatitude:" + request.TouristLatitude.ToString());
-            var response = client.ActivateEncounterExecution(request);
-
-            return await Task.FromResult(response);
-        }
-        public override async Task<EncounterExecutionDto> CompleteExecution(ActivateRequest request,
-            ServerCallContext context)
-        {
-            var client = getClient();
-            _logger.Log(LogLevel.Warning, "Completing encounter execution with touristLatitude:" + request.TouristLatitude.ToString());
-            var response = client.CompleteExecution(request);
-
-            return await Task.FromResult(response);
-        }
-        public override async Task<Empty> DeleteExecution(EncounterId id,
-            ServerCallContext context)
-        {
-            var client = getClient();
-            _logger.Log(LogLevel.Warning, "Deleting encounter execution with id:" + id.Id.ToString());
-            var response = client.DeleteExecution(id);
-
-            return await Task.FromResult(response);
-        }
-        public override async Task<PagedExecutions> GetAllExecutionsByTourist(EncounterId id,
-            ServerCallContext context)
-        {
-            var client = getClient();
-            _logger.Log(LogLevel.Warning, "Getting all encounter executions bz the tourist with id:" + id.Id.ToString());
-            var response = client.GetAllExecutionsByTourist(id);
-
-            return await Task.FromResult(response);
-        }
-        public override async Task<PagedExecutions> GetAllCompletedExecutionsByTourist(PagedRequestWithId id,
-            ServerCallContext context)
-        {
-            var client = getClient();
-            _logger.Log(LogLevel.Warning, "Getting all completed encounter executions bz the tourist with id:" + id.Id.ToString());
-            var response = client.GetAllCompletedExecutionsByTourist(id);
-
-            return await Task.FromResult(response);
         }
     }
 }

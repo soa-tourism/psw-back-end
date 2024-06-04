@@ -20,21 +20,21 @@ services:
     depends_on:
       - explorer_db
 
-  encounters:
-    image: encounters-service
-    restart: on-failure
-    networks:
-      - database
-    ports:
-      - "8087:8087"
-    environment:
-      DATABASE_HOST: explorer_db
-      DATABASE_PORT: 5432
-      DATABASE_PASSWORD: super
-      DATABASE_USER: postgres
-      DATABASE_SCHEMA: explorer
-    depends_on:
-      - explorer_db
+  # encounters:
+  #   image: encounters-service
+  #   restart: on-failure
+  #   networks:
+  #     - database
+  #   ports:
+  #     - "8087:8087"
+  #   environment:
+  #     DATABASE_HOST: explorer_db
+  #     DATABASE_PORT: 5432
+  #     DATABASE_PASSWORD: super
+  #     DATABASE_USER: postgres
+  #     DATABASE_SCHEMA: explorer
+  #   depends_on:
+  #     - explorer_db
 
   followers:
     image: followers-service
@@ -42,7 +42,7 @@ services:
     container_name: "followers-server"
     #hostname: "followers-server"
     ports:
-      - 8082:8082
+      - 8087:8082
     environment:
       - PORT=8082
       - NEO4J_DB=bolt://neo4j:7687
@@ -51,7 +51,7 @@ services:
     depends_on:
       neo4j:
         condition: service_healthy
-
+   
   neo4j:
     image: neo4j
     restart: always
@@ -74,16 +74,32 @@ services:
     - followers-data:/data
     - ./init-scripts:/docker-entrypoint-initdb.d # Mounting init-scripts directory
 
-  tours: 
-    image: tours-service
+  # tours: 
+  #   image: tours-service
+  #   restart: on-failure
+  #   ports:
+  #     - "8083:8083"
+  #   environment:
+  #     - MONGO_DB_URI=mongodb://root:pass@mongo:27017
+  #   depends_on:
+  #     mongo:
+  #       condition: service_healthy
+
+  stakeholders: 
+    image: stakeholders-service
     restart: on-failure
+    networks:
+      - database
     ports:
-      - "8083:8083"
+      - "8089:8089"
     environment:
-      - MONGO_DB_URI=mongodb://root:pass@mongo:27017
+      DATABASE_HOST: stakeholders_db  
+      DATABASE_PORT: 5432  
+      DATABASE_PASSWORD: super  
+      DATABASE_USER: postgres 
+      DATABASE_SCHEMA: soa-stakeholders 
     depends_on:
-      mongo:
-        condition: service_healthy
+      - stakeholders_db 
 
   explorer_db:
     image: postgres:latest
@@ -104,43 +120,61 @@ services:
     ports:
       - "5432:5432"
 
-  mongo:
-    image: mongo
+  stakeholders_db: 
+    image: postgres:latest
     restart: always
-    ports:
-      - "27017:27017"
+    networks:
+      - database
     environment:
-      MONGO_INITDB_ROOT_USERNAME: root
-      MONGO_INITDB_ROOT_PASSWORD: pass
-      MONGO_INITDB_DATABASE: mongo
-    healthcheck:
-      test: echo 'db.runCommand("ping").ok'
-      interval: 10s
-      timeout: 10s
-      retries: 10
+      POSTGRES_PASSWORD: super
+      POSTGRES_USER: postgres
+      POSTGRES_DB: soa-stakeholders 
     volumes:
-      - mongo_store:/data/db
+      - type: volume
+        source: stakeholders-data
+        target: /var/lib/postgresql/data
+    ports:
+      - "5434:5432"
+
+  # mongo:
+  #   image: mongo
+  #   restart: always
+  #   ports:
+  #     - "27017:27017"
+  #   environment:
+  #     MONGO_INITDB_ROOT_USERNAME: root
+  #     MONGO_INITDB_ROOT_PASSWORD: pass
+  #     MONGO_INITDB_DATABASE: mongo
+  #   healthcheck:
+  #     test: echo 'db.runCommand("ping").ok'
+  #     interval: 10s
+  #     timeout: 10s
+  #     retries: 10
+  #   volumes:
+  #     - mongo_store:/data/db
     
-  mongo-express:
-    image: mongo-express:latest
-    restart: always
-    environment:
-      - ME_CONFIG_MONGODB_SERVER=mongo
-      - ME_CONFIG_MONGODB_ADMINUSERNAME=root
-      - ME_CONFIG_MONGODB_ADMINPASSWORD=pass
-      - ME_CONFIG_BASICAUTH_USERNAME=admin
-      - ME_CONFIG_BASICAUTH_PASSWORD=example
-      - ME_CONFIG_MONGODB_URL=mongodb://mongo:27017/
-    depends_on:
-      - mongo
-    ports:
-      - "8081:8081"
-    volumes:
-      - mongo_express_data:/data/db
+  # mongo-express:
+  #   image: mongo-express:latest
+  #   restart: always
+  #   environment:
+  #     - ME_CONFIG_MONGODB_SERVER=mongo
+  #     - ME_CONFIG_MONGODB_ADMINUSERNAME=root
+  #     - ME_CONFIG_MONGODB_ADMINPASSWORD=pass
+  #     - ME_CONFIG_BASICAUTH_USERNAME=admin
+  #     - ME_CONFIG_BASICAUTH_PASSWORD=example
+  #     - ME_CONFIG_MONGODB_URL=mongodb://mongo:27017/
+  #   depends_on:
+  #     - mongo
+  #   ports:
+  #     - "8081:8081"
+  #   volumes:
+  #     - mongo_express_data:/data/db
 
 volumes:
   explorer-data:
     name: explorer-data
+  stakeholders-data:
+    name: stakeholders-data
   mongo_store:
   mongo_express_data:
   followers-data:
